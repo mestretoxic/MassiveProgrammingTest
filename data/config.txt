@@ -1,0 +1,4 @@
+#format is [variableName = value]
+tileSize = 22
+fontMain = freefont-ttf\\sfd\\FreeMono.ttf
+fontHud = freefont-ttf\\sfd\\FreeMono.ttf

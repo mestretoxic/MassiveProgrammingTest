@@ -1,14 +1,17 @@
 #ifndef DOT_H
 #define DOT_H
 
-#include "StaticGameEntity.h"
-#include "Vector2f.h"
+#include "GameEntity.h"
+#include "Vector2.h"
 
-class Dot : public StaticGameEntity
+class Dot : public GameEntity
 {
 public:
-	Dot(Vector2f aPosition);
-	~Dot(void);
+	Dot(Vector2i position) : GameEntity(position, "Small_Dot_32.png")
+	{
+	}
+
+	~Dot(void) = default;
 };
 
 #endif // DOT_H

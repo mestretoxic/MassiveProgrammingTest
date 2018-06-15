@@ -1,177 +1,114 @@
 #include "Pacman.h"
 #include "Drawer.h"
 #include "SDL.h"
-#include <iostream>
-#include <sstream>
-#include <fstream>
 #include <string>
 
 #include "Avatar.h"
 #include "World.h"
 #include "Ghost.h"
+#include "Config.h"
 
-Pacman* Pacman::Create(Drawer* aDrawer)
+Pacman* Pacman::Create(Drawer* drawer)
 {
-	Pacman* pacman = new Pacman(aDrawer);
+	auto* pacman = new Pacman(drawer);
 
 	if (!pacman->Init())
 	{
 		delete pacman;
-		pacman = NULL;
+		pacman = nullptr;
 	}
 
 	return pacman;
 }
 
-Pacman::Pacman(Drawer* aDrawer)
-: myDrawer(aDrawer)
-, myTimeToNextUpdate(0.f)
-, myNextMovement(-1.f,0.f)
-, myScore(0)
-, myFps(0)
-, myLives(3)
-, myGhostGhostCounter(0.f)
+Pacman::Pacman(Drawer* drawer)
+: m_lives(3)
+, m_score(0)
+, m_drawer(drawer)
+, m_fps(0)
 {
-	myAvatar = new Avatar(Vector2f(13*22,22*22));
-	myGhost = new Ghost(Vector2f(13*22,13*22));
-	myWorld = new World();
+	m_world = new World();
 }
 
-Pacman::~Pacman(void)
-{
-}
+Pacman::~Pacman(void) = default;
 
-bool Pacman::Init()
+bool Pacman::Init() const
 {
-	myWorld->Init();
+	Config::ReadConfig("config.txt");
+	m_world->Init();
 
 	return true;
 }
 
-bool Pacman::Update(float aTime)
+bool Pacman::Update(const float dt, SDL_Event& event)
 {
-	if (!UpdateInput())
+	if (!UpdateInput(event))
 		return false;
 
 	if (CheckEndGameCondition())
-	{
-		myDrawer->DrawText("You win!", "freefont-ttf\\sfd\\FreeMono.ttf", 20, 70);
 		return true;
-	}
-	else if (myLives <= 0)
-	{
-		myDrawer->DrawText("You lose!", "freefont-ttf\\sfd\\FreeMono.ttf", 20, 70);	
-		return true;
-	}
 
-	MoveAvatar();
-	myAvatar->Update(aTime);
-	myGhost->Update(aTime, myWorld);
+	m_world->Update(dt, this);
 
-	if (myWorld->HasIntersectedDot(myAvatar->GetPosition()))
-		myScore += 10;
-
-	myGhostGhostCounter -= aTime;
-
-	if (myWorld->HasIntersectedBigDot(myAvatar->GetPosition()))
-	{
-		myScore += 20;
-		myGhostGhostCounter = 20.f;
-		myGhost->myIsClaimableFlag = true;
-	}
-
-	if (myGhostGhostCounter <= 0)
-	{
-		myGhost->myIsClaimableFlag = false;
-	}
-
-	if ((myGhost->GetPosition() - myAvatar->GetPosition()).Length() < 10.f)
-	{
-		if (myGhostGhostCounter <= 0.f)
-		{
-			myLives--;
-
-			myAvatar->SetPosition(Vector2f(13*22,22*22));
-			myGhost->SetPosition(Vector2f(13*22,13*22));
-		}
-		else if (myGhost->myIsClaimableFlag && !myGhost->myIsDeadFlag)
-		{
-			myScore += 50;
-			myGhost->myIsDeadFlag = true;
-			myGhost->Die(myWorld);
-		}
-	}
-	
-	if (aTime > 0)
-		myFps = (int) (1 / aTime);
+	if (dt > 0)
+		m_fps = static_cast<int>(1 / dt);
 
 	return true;
 }
 
-bool Pacman::UpdateInput()
+bool Pacman::UpdateInput(SDL_Event& event) const
 {
-	const Uint8 *keystate = SDL_GetKeyboardState(NULL);
+	if (event.type == SDL_KEYDOWN) {
+		switch(event.key.keysym.sym)
+		{
+			case SDLK_ESCAPE:
+				return false;
 
-	if (keystate[SDL_SCANCODE_UP])
-		myNextMovement = Vector2f(0.f, -1.f);
-	else if (keystate[SDL_SCANCODE_DOWN])
-		myNextMovement = Vector2f(0.f, 1.f);
-	else if (keystate[SDL_SCANCODE_RIGHT])
-		myNextMovement = Vector2f(1.f, 0.f);
-	else if (keystate[SDL_SCANCODE_LEFT])
-		myNextMovement = Vector2f(-1.f, 0.f);
-
-	if (keystate[SDL_SCANCODE_ESCAPE])
-		return false;
+			case SDLK_UP:
+				m_world->GetAvatar()->SetMovement(Movement::UP, m_world);
+				break;
+			case SDLK_DOWN:
+				m_world->GetAvatar()->SetMovement(Movement::DOWN, m_world);
+				break;
+			case SDLK_RIGHT:
+				m_world->GetAvatar()->SetMovement(Movement::RIGHT, m_world);
+				break;
+			case SDLK_LEFT:
+				m_world->GetAvatar()->SetMovement(Movement::LEFT, m_world);
+				break;
+		default: ;
+		}
+	}
 
 	return true;
 }
 
-void Pacman::MoveAvatar()
+bool Pacman::CheckEndGameCondition() const
 {
-	int nextTileX = myAvatar->GetCurrentTileX() + myNextMovement.myX;
-	int nextTileY = myAvatar->GetCurrentTileY() + myNextMovement.myY;
+	return !m_world->HasDots() || m_lives <= 0;
+}
 
-	if (myAvatar->IsAtDestination())
+bool Pacman::Draw() const
+{
+	m_world->Draw(m_drawer);
+
+	std::string scoreString = "Score: " + std::to_string(m_score);
+	m_drawer->DrawText(scoreString.c_str(), FONT, 20, 50);
+
+	std::string livesString = "Lives: " + std::to_string(m_lives);
+	m_drawer->DrawText(livesString.c_str(), FONT, 20, 80);
+
+	std::string fpsString = "FPS: " + std::to_string(m_fps);
+	m_drawer->DrawText(fpsString.c_str(), FONT, 880, 50);
+
+	if (!m_world->HasDots())
 	{
-		if (myWorld->TileIsValid(nextTileX, nextTileY))
-		{
-			myAvatar->SetNextTile(nextTileX, nextTileY);
-		}
+		m_drawer->DrawTextAligned("You win!", FONT, 48);
 	}
-}
-
-bool Pacman::CheckEndGameCondition()
-{
-	return false;
-}
-
-bool Pacman::Draw()
-{
-	myWorld->Draw(myDrawer);
-	myAvatar->Draw(myDrawer);
-	myGhost->Draw(myDrawer);
-
-	std::string scoreString;
-	std::stringstream scoreStream;
-	scoreStream << myScore;
-	scoreString = scoreStream.str();
-	myDrawer->DrawText("Score", "freefont-ttf\\sfd\\FreeMono.ttf", 20, 50);
-	myDrawer->DrawText(scoreString.c_str(), "freefont-ttf\\sfd\\FreeMono.ttf", 90, 50);
-
-	std::string livesString;
-	std::stringstream liveStream;
-	liveStream << myLives;
-	livesString = liveStream.str();
-	myDrawer->DrawText("Lives", "freefont-ttf\\sfd\\FreeMono.ttf", 20, 80);
-	myDrawer->DrawText(livesString.c_str(), "freefont-ttf\\sfd\\FreeMono.ttf", 90, 80);
-
-	myDrawer->DrawText("FPS", "freefont-ttf\\sfd\\FreeMono.ttf", 880, 50);
-	std::string fpsString;
-	std::stringstream fpsStream;
-	fpsStream << myFps;
-	fpsString = fpsStream.str();
-	myDrawer->DrawText(fpsString.c_str(), "freefont-ttf\\sfd\\FreeMono.ttf", 930, 50);
+	else if (m_lives <= 0)
+	{
+		m_drawer->DrawTextAligned("You lose!", FONT, 48);	
+	}
 
 	return true;
 }

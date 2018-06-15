@@ -1,12 +1,11 @@
 #include "SDL.h"
 #include "SDL_image.h"
 #include "SDL_ttf.h"
-#include "assert.h"
+#include <cassert>
 #include "pacman.h"
 #include "drawer.h"
-#include <iostream>
 
-int main(int argc, char **argv)
+int main(int, char **)
 {
 	/* initialize SDL */
 	if ( SDL_Init( SDL_INIT_VIDEO ) < 0 )
@@ -35,20 +34,21 @@ int main(int argc, char **argv)
 	Drawer* drawer = Drawer::Create(window, renderer);
 	Pacman* pacman = Pacman::Create(drawer);
 
-	float lastFrame = (float) SDL_GetTicks() * 0.001f;
+	float lastFrame = static_cast<float>(SDL_GetTicks()) * 0.001f;
 	SDL_Event event;
 	while (SDL_PollEvent(&event) >= 0)
 	{
-		float currentFrame = (float) SDL_GetTicks() * 0.001f;
-		float elapsedTime = currentFrame - lastFrame;
+		const float currentFrame = static_cast<float>(SDL_GetTicks()) * 0.001f;
+		const float elapsedTime = currentFrame - lastFrame;
 
-		if (!pacman->Update(elapsedTime))
+		if (!pacman->Update(elapsedTime, event))
 			break;
 
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 		SDL_RenderClear(renderer);
 
-		pacman->Draw();
+		if (!pacman->Draw())
+			break;
 		
 		lastFrame = currentFrame;		
 

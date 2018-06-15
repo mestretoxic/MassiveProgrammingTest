@@ -2,102 +2,114 @@
 #include "World.h"
 #include "PathmapTile.h"
 #include "Drawer.h"
+#include "Avatar.h"
 
-Ghost::Ghost(const Vector2f& aPosition)
-: MovableGameEntity(aPosition, "ghost_32.png")
+Ghost::Ghost(const GhostType type, const Vector2i& position)
+: MovableGameEntity(position, "ghost_32.png")
 {
-	myIsClaimableFlag = false;
-	myIsDeadFlag = false;
+	m_type = type;
+	m_isVulnerable = false;
+	m_isDead = false;
 
-	myDesiredMovementX = 0;
-	myDesiredMovementY = -1;
+	m_desiredMovementX = 0;
+	m_desiredMovementY = -1;
 }
 
-Ghost::~Ghost(void)
+void Ghost::Die(World* world)
 {
+	m_isDead = true;
+	m_path.clear();
+	const Vector2i startPosition = World::GetGhostStartPosition();
+	world->GetPath(GetCurrentTileX(), GetCurrentTileY(), startPosition.x, startPosition.y, m_path);
 }
 
-void Ghost::Die(World* aWorld)
+void Ghost::Update(const float dt, World* world)
 {
-	myPath.clear();
-	aWorld->GetPath(myCurrentTileX, myCurrentTileY, 13, 13, myPath);
-}
+	if (!m_isDead && !m_isVulnerable)
+		world->GetPath(GetCurrentTileX(), GetCurrentTileY(), world->GetAvatarTileX(), world->GetAvatarTileY(), m_path);
 
-void Ghost::Update(float aTime, World* aWorld)
-{
-	float speed = 30.f;
-	int nextTileX = GetCurrentTileX() + myDesiredMovementX;
-	int nextTileY = GetCurrentTileY() + myDesiredMovementY;
+	float speed = GHOST_VELOCITY;
+	const int nextTileX = GetCurrentTileX() + m_desiredMovementX;
+	const int nextTileY = GetCurrentTileY() + m_desiredMovementY;
 
-	if (myIsDeadFlag)
-		speed = 120.f;
+	if (m_isDead)
+		speed = GHOST_VELOCITY_DEAD;
 
 	if (IsAtDestination())
 	{
-		if (!myPath.empty())
+		if (!m_path.empty())
 		{
-			PathmapTile* nextTile = myPath.front();
-			myPath.pop_front();
-			SetNextTile(nextTile->myX, nextTile->myY);
+			PathmapTile* nextTile = m_path.front();
+			m_path.pop_front();
+			SetNextTile(nextTile->x, nextTile->y);
 		}
-		else if (aWorld->TileIsValid(nextTileX, nextTileY))
+		else if (world->TileIsValid(nextTileX, nextTileY))
 		{
 			SetNextTile(nextTileX, nextTileY);
 		}
 		else
 		{
-			if (myDesiredMovementX == 1)
+			if (m_desiredMovementX == 1)
 			{
-				myDesiredMovementX = 0;
-				myDesiredMovementY = 1;
-			} else if (myDesiredMovementY == 1)
+				m_desiredMovementX = 0;
+				m_desiredMovementY = 1;
+			} else if (m_desiredMovementY == 1)
 			{
-				myDesiredMovementX = -1;
-				myDesiredMovementY = 0;			
-			} else if (myDesiredMovementX == -1)
+				m_desiredMovementX = -1;
+				m_desiredMovementY = 0;			
+			} else if (m_desiredMovementX == -1)
 			{
-				myDesiredMovementX = 0;
-				myDesiredMovementY = -1;
+				m_desiredMovementX = 0;
+				m_desiredMovementY = -1;
 			} else
 			{
-				myDesiredMovementX = 1;
-				myDesiredMovementY = 0;
+				m_desiredMovementX = 1;
+				m_desiredMovementY = 0;
 			}
 
-			myIsDeadFlag = false;
+			m_isDead = false;
 		}
 	}
 
-	int tileSize = 22;
-	Vector2f destination(myNextTileX * tileSize, myNextTileY * tileSize);
-	Vector2f direction = destination - myPosition;
+	const Vector2f destination(static_cast<float>(m_nextTileX * World::GetTileSize()), static_cast<float>(m_nextTileY * World::GetTileSize()));
+	Vector2f direction = destination - m_position;
 
-	float distanceToMove = aTime * speed;
-
+	const float distanceToMove = dt * speed;
 	if (distanceToMove > direction.Length())
 	{
-		myPosition = destination;
-		myCurrentTileX = myNextTileX;
-		myCurrentTileY = myNextTileY;
+		m_position = destination;
 	}
 	else
 	{
 		direction.Normalize();
-		myPosition += direction * distanceToMove;
+		m_position += direction * distanceToMove;
 	}
 }
 
-void Ghost::SetImage(const char* anImage)
+void Ghost::Draw(Drawer* drawer)
 {
-	myImage = anImage;
-}
-
-void Ghost::Draw(Drawer* aDrawer)
-{
-	if (myIsDeadFlag)
-		aDrawer->Draw("Ghost_Dead_32.png", (int)myPosition.myX + 220, (int)myPosition.myY + 60);
-	else if (myIsClaimableFlag)
-		aDrawer->Draw("Ghost_Vulnerable_32.png", (int)myPosition.myX + 220, (int)myPosition.myY + 60);
+	if (m_isDead)
+		m_image = GHOST_DEAD;
+	else if (m_isVulnerable)
+		m_image = GHOST_VULNERABLE;
 	else
-		aDrawer->Draw(myImage, (int)myPosition.myX + 220, (int)myPosition.myY + 60);
+		switch(m_type)
+		{
+		case RED:
+			m_image = GHOST_RED;
+			break;
+		case PINK:
+			m_image = GHOST_PINK;
+			break;
+		case ORANGE:
+			m_image = GHOST_ORANGE;
+			break;
+		case CYAN:
+			m_image = GHOST_CYAN;
+			break;
+		default:
+			m_image = GHOST_DEFAULT;
+		}
+
+	GameEntity::Draw(drawer); //using super-class method
 }

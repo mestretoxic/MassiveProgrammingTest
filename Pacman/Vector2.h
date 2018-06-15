@@ -2,21 +2,23 @@
 #define VECTOR2_H
 
 #include <cmath>
+
 //Made this a template class for versatility
 template<typename T>
-class Vector2<T>
+class Vector2
 {
 public:
-	Vector2()
-	{
-		x = 0.f;
-		y = 0.f;
-	}
+	T x, y;
 
 	Vector2(T anX, T anY)
 	{
 		x = anX;
 		y = anY;
+	}
+
+	bool operator==(const Vector2 &other) const 
+	{
+		return x == other.x && y == other.y;
 	}
 
 	const Vector2 operator-(const Vector2 &other) const 
@@ -31,7 +33,6 @@ public:
 		return v;
 	}
 
-	
 	const Vector2 operator*(const Vector2& other) const 
 	{
 		Vector2 v(x*other.x, y*other.y);
@@ -80,9 +81,10 @@ public:
 		if (length > 0.f)
 			*this /= length;
 	}
-
-	float x;
-	float y;
 };
+
+typedef Vector2<float> Vector2f;
+typedef Vector2<double> Vector2d;
+typedef Vector2<int> Vector2i;
 
 #endif // VECTOR2_H

@@ -1,30 +1,49 @@
 #ifndef GAMEENTITY_H
 #define GAMEENTITY_H
 
-#include "Vector2f.h"
+#include "Vector2.h"
 
+class World;
 class Drawer;
 
 class GameEntity
 {
 public:
-	GameEntity(const Vector2f& aPosition, const char* anImage);
-	~GameEntity(void);
+	GameEntity(const Vector2i& position, const char* image);
+	virtual ~GameEntity(void) = default;
 
-	Vector2f GetPosition() const { return myPosition; }
-	void SetPosition(const Vector2f& aPosition){ myPosition = aPosition; }
+	Vector2f GetPosition() const
+	{
+		return m_position;
+	}
+	void SetPosition(const Vector2f& position)
+	{
+		m_position = position;
+	}
+	void SetPosition(const Vector2i& position)
+	{ 	
+		m_position.x = position.x * 22.f;
+		m_position.y = position.y * 22.f;
+	}
 
-	bool Intersect(GameEntity* aGameEntity);
-	virtual void Draw(Drawer* aDrawer);
+	virtual bool Intersect(const GameEntity* entity);
+	virtual void Draw(Drawer* drawer);
+	virtual void Update(float dt, World* world);
 
-	void MarkForDelete() { myIdMarkedForDeleteFlag = true; }
-	bool IsMarkedForDelete() const { return myIdMarkedForDeleteFlag; }
+	void MarkForDelete()
+	{
+		m_isMarkedForDeleteFlag = true;
+	}
+	bool IsMarkedForDelete() const
+	{
+		return m_isMarkedForDeleteFlag;
+	}
 
 protected:
 
-	bool myIdMarkedForDeleteFlag;
-	Vector2f myPosition;
-	const char* myImage;
+	bool m_isMarkedForDeleteFlag;
+	Vector2f m_position;
+	const char* m_image;
 };
 
 #endif // GAMEENTITY_H

@@ -30,18 +30,6 @@
     <ClCompile Include="GameEntity.cpp">
       <Filter>Game\Game entities</Filter>
     </ClCompile>
-    <ClCompile Include="BigDot.cpp">
-      <Filter>Game\Game entities\Static</Filter>
-    </ClCompile>
-    <ClCompile Include="Cherry.cpp">
-      <Filter>Game\Game entities\Static</Filter>
-    </ClCompile>
-    <ClCompile Include="Dot.cpp">
-      <Filter>Game\Game entities\Static</Filter>
-    </ClCompile>
-    <ClCompile Include="StaticGameEntity.cpp">
-      <Filter>Game\Game entities\Static</Filter>
-    </ClCompile>
     <ClCompile Include="Avatar.cpp">
       <Filter>Game\Game entities\Movable</Filter>
     </ClCompile>
@@ -51,19 +39,16 @@
     <ClCompile Include="MovableGameEntity.cpp">
       <Filter>Game\Game entities\Movable</Filter>
     </ClCompile>
-    <ClCompile Include="PathmapTile.cpp">
-      <Filter>Game\World</Filter>
-    </ClCompile>
     <ClCompile Include="World.cpp">
       <Filter>Game\World</Filter>
     </ClCompile>
     <ClCompile Include="Drawer.cpp">
       <Filter>Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="Vector2f.cpp">
-      <Filter>Math</Filter>
-    </ClCompile>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Pathfinder.cpp">
+      <Filter>Game\World</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Pacman.h">
@@ -79,9 +64,6 @@
       <Filter>Game\Game entities\Static</Filter>
     </ClInclude>
     <ClInclude Include="Dot.h">
-      <Filter>Game\Game entities\Static</Filter>
-    </ClInclude>
-    <ClInclude Include="StaticGameEntity.h">
       <Filter>Game\Game entities\Static</Filter>
     </ClInclude>
     <ClInclude Include="Avatar.h">
@@ -102,8 +84,17 @@
     <ClInclude Include="Drawer.h">
       <Filter>Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="Vector2f.h">
+    <ClInclude Include="Timeline.h">
+      <Filter>Game\Game entities\Movable</Filter>
+    </ClInclude>
+    <ClInclude Include="Vector2.h">
       <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Pathfinder.h">
+      <Filter>Game\World</Filter>
+    </ClInclude>
+    <ClInclude Include="Config.h">
+      <Filter>Game</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -124,18 +124,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Avatar.cpp" />
-    <ClCompile Include="BigDot.cpp" />
-    <ClCompile Include="Cherry.cpp" />
-    <ClCompile Include="Dot.cpp" />
     <ClCompile Include="Drawer.cpp" />
     <ClCompile Include="GameEntity.cpp" />
     <ClCompile Include="Ghost.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MovableGameEntity.cpp" />
     <ClCompile Include="Pacman.cpp" />
-    <ClCompile Include="PathmapTile.cpp" />
-    <ClCompile Include="StaticGameEntity.cpp" />
-    <ClCompile Include="Vector2f.cpp" />
+    <ClCompile Include="Pathfinder.cpp" />
     <ClCompile Include="World.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -148,9 +143,11 @@
     <ClInclude Include="Ghost.h" />
     <ClInclude Include="MovableGameEntity.h" />
     <ClInclude Include="Pacman.h" />
+    <ClInclude Include="Pathfinder.h" />
     <ClInclude Include="PathmapTile.h" />
-    <ClInclude Include="StaticGameEntity.h" />
-    <ClInclude Include="Vector2f.h" />
+    <ClInclude Include="Timeline.h" />
+    <ClInclude Include="Config.h" />
+    <ClInclude Include="Vector2.h" />
     <ClInclude Include="World.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -1,7 +1,7 @@
 #ifndef PACMAN_H
 #define PACMAN_H
 
-#include "Vector2f.h"
+#include <SDL.h>
 
 struct SDL_Surface;
 class Drawer;
@@ -9,37 +9,31 @@ class Avatar;
 class World;
 class Ghost;
 
+#define FONT "freefont-ttf\\sfd\\FreeMono.ttf"
+
 class Pacman
 {
 public:
-	static Pacman* Create(Drawer* aDrawer);
+	static Pacman* Create(Drawer* drawer);
 	~Pacman(void);
 
-	bool Update(float aTime);
-	bool Draw();
+	bool Update(float dt, SDL_Event&);
+	bool Draw() const;
+
+	int m_lives;
+	int m_score;
 
 private:
-	Pacman(Drawer* aDrawer);
-	bool Init();
-	bool UpdateInput();
-	void MoveAvatar();
-	bool CheckEndGameCondition();
+	explicit Pacman(Drawer* aDrawer);
+	bool Init() const;
+	bool UpdateInput(SDL_Event&) const;
+	bool CheckEndGameCondition() const;
 
-	Drawer* myDrawer;
+	Drawer* m_drawer;
 
-	float myTimeToNextUpdate;
-	float myGhostGhostCounter;
+	int m_fps;
 
-	int myLives;
-	int myScore;
-	int myFps;
-
-	Vector2f myNextMovement;
-
-	Avatar* myAvatar;
-	Ghost* myGhost;
-	World* myWorld;
-
+	World* m_world;
 };
 
 #endif // PACMAN_H

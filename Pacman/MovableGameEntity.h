@@ -2,27 +2,25 @@
 #define MOVABLEGAMEENTITY_H
 
 #include "GameEntity.h"
-#include "Vector2f.h"
+#include "Vector2.h"
+
+class World;
 
 class MovableGameEntity : public GameEntity
 {
 public:
-	MovableGameEntity(const Vector2f& aPosition, const char* anImage);
-	~MovableGameEntity(void);
+	MovableGameEntity(const Vector2i& start, const char* image);
 
-	void SetNextTile(int anX, int anY);
-	int GetCurrentTileX() const { return myCurrentTileX; }
-	int GetCurrentTileY() const { return myCurrentTileY; }
-
-	bool IsAtDestination();
+	void SetNextTile(int x, int y);
+	int GetCurrentTileX() const;
+	int GetCurrentTileY() const;
+	bool IsAtDestination() const;
+	bool IsInTileCenter() const;
 
 protected:
 
-	int myCurrentTileX;
-	int myCurrentTileY;
-
-	int myNextTileX;
-	int myNextTileY;
+	int m_nextTileX;
+	int m_nextTileY;
 
 };
 

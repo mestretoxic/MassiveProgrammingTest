@@ -1,14 +1,17 @@
 #ifndef CHERRY_H
 #define CHERRY_H
 
-#include "StaticGameEntity.h"
-#include "Vector2f.h"
+#include "GameEntity.h"
+#include "Vector2.h"
 
-class Cherry : public StaticGameEntity
+class Cherry : public GameEntity
 {
 public:
-	Cherry(Vector2f aPosition);
-	~Cherry(void);
+	Cherry(Vector2i position) : GameEntity(position, "dot.png")
+	{
+	}
+
+	~Cherry(void) = default;
 };
 
 #endif // CHERRY_H

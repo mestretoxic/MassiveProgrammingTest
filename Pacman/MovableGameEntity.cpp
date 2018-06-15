@@ -1,30 +1,35 @@
 #include "MovableGameEntity.h"
+#include "World.h"
 
-MovableGameEntity::MovableGameEntity(const Vector2f& aPosition, const char* anImage)
-: GameEntity(aPosition, anImage)
+MovableGameEntity::MovableGameEntity(const Vector2i& start, const char* image)
+: GameEntity(start, image)
 {
-	myCurrentTileX = myNextTileX =  myPosition.myX / 22;
-	myCurrentTileY = myNextTileY =  myPosition.myY / 22;
+	m_nextTileX = GetCurrentTileX();
+	m_nextTileY = GetCurrentTileY();
 }
 
-MovableGameEntity::~MovableGameEntity(void)
+bool MovableGameEntity::IsAtDestination() const
 {
+	return GetCurrentTileX() == m_nextTileX && GetCurrentTileY() == m_nextTileY;
 }
 
-bool MovableGameEntity::IsAtDestination()
+void MovableGameEntity::SetNextTile(const int x, const int y)
 {
-	if (myCurrentTileX == myNextTileX && myCurrentTileY == myNextTileY)
-	{
-
-
-		return true;
-	}
-
-	return false;
+	m_nextTileX = x;
+	m_nextTileY = y;
 }
 
-void MovableGameEntity::SetNextTile(int anX, int anY)
+int MovableGameEntity::GetCurrentTileX() const
 {
-	myNextTileX = anX;
-	myNextTileY = anY;
+	return int(m_position.x / 22);
+}
+
+int MovableGameEntity::GetCurrentTileY() const
+{
+	return int(m_position.y / 22);
+}
+
+bool MovableGameEntity::IsInTileCenter() const
+{
+	return m_position.x - GetCurrentTileX() * World::GetTileSize() < 0.5 && m_position.y - GetCurrentTileY() * World::GetTileSize() < 0.5;
 }

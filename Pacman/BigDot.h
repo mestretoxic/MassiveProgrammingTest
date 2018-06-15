@@ -1,14 +1,17 @@
 #ifndef BIGDOT_H
 #define BIGDOT_H
 
-#include "StaticGameEntity.h"
-#include "Vector2f.h"
+#include "GameEntity.h"
+#include "Vector2.h"
 
-class BigDot : public StaticGameEntity
+class BigDot : public GameEntity
 {
 public:
-	BigDot(Vector2f aPosition);
-	~BigDot(void);
+	BigDot(Vector2i position) : GameEntity(position, "Big_Dot_32.png")
+	{
+	}
+
+	~BigDot(void) = default;
 };
 
 #endif // BIGDOT_H

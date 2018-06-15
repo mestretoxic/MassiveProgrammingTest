@@ -1,85 +1,124 @@
 #include "Drawer.h"
-#include "SDL.h"
 #include "SDL_image.h"
 #include "SDL_ttf.h"
+#include "Vector2.h"
 
-Drawer* Drawer::Create(SDL_Window* aWindow, SDL_Renderer* aRenderer)
+Drawer* Drawer::Create(SDL_Window* window, SDL_Renderer* renderer)
 {
-	Drawer* drawer = new Drawer(aWindow, aRenderer);
+	auto drawer = new Drawer(window, renderer);
 
 	if (!drawer->Init())
 	{
 		delete drawer;
-		drawer = NULL;
+		drawer = nullptr;
 	}
 
 	return drawer;
 }
 
-Drawer::Drawer(SDL_Window* aWindow, SDL_Renderer* aRenderer)
-: myWindow(aWindow)
-, myRenderer(aRenderer)
+Drawer::Drawer(SDL_Window* window, SDL_Renderer* renderer)
+: m_window(window)
+, m_renderer(renderer)
 {
 }
 
-Drawer::~Drawer(void)
+Drawer::~Drawer(void) = default;
+
+bool Drawer::Init() const
 {
+	return m_window != nullptr;
 }
 
-bool Drawer::Init()
+SurfaceData* Drawer::GetSurfaceData(const char* imagePath)
 {
-	if (!myWindow)
-		return false;
+	const auto it = m_loadedTextures.find(imagePath);
+	if (it != m_loadedTextures.end())
+	{
+		return it->second;
+	}
 
-	return true;
-}
-
-void Drawer::Draw(const char* anImage, int aCellX, int aCellY)
-{
-	SDL_Surface* surface = IMG_Load( anImage ) ;
-
+	SDL_Surface* surface = IMG_Load(imagePath);
 	if (!surface)
-		return;
+		return nullptr;
 
-	SDL_Texture* optimizedSurface = SDL_CreateTextureFromSurface(myRenderer, surface);
+	SDL_Texture* texture = SDL_CreateTextureFromSurface(m_renderer, surface);
+	if (!texture)
+		return nullptr;
 
-    SDL_Rect sizeRect;
-    sizeRect.x = 0 ;
-    sizeRect.y = 0 ;
-    sizeRect.w = surface->w ;
-    sizeRect.h = surface->h ;
-
-    SDL_Rect posRect ;
-    posRect.x = aCellX;
-    posRect.y = aCellY;
-	posRect.w = sizeRect.w;
-	posRect.h = sizeRect.h;
-
-	SDL_RenderCopy(myRenderer, optimizedSurface, &sizeRect, &posRect);	
+	const auto surfaceData = new SurfaceData(surface, texture);
+	m_loadedTextures[imagePath] = surfaceData;
+	return surfaceData;
 }
 
-void Drawer::DrawText(const char* aText, const char* aFontFile, int aX, int aY)
+void Drawer::Draw(const char* image, const int pixelX, const int pixelY)
 {
-	TTF_Font* font=TTF_OpenFont(aFontFile, 24);
+	const SurfaceData* surfaceData = GetSurfaceData(image);
+	SDL_Rect sizeRect;
+    sizeRect.x = 0;
+    sizeRect.y = 0;
+    sizeRect.w = surfaceData->surface->w;
+    sizeRect.h = surfaceData->surface->h;
 
-	SDL_Color fg={255,0,0,255};
-	SDL_Surface* surface = TTF_RenderText_Solid(font, aText, fg);
+    SDL_Rect posRect;
+    posRect.x = pixelX;
+    posRect.y = pixelY;
+	posRect.w = sizeRect.w;
+	posRect.h = sizeRect.h;
 
-	SDL_Texture* optimizedSurface = SDL_CreateTextureFromSurface(myRenderer, surface);
+	SDL_RenderCopy(m_renderer, surfaceData->texture, &sizeRect, &posRect);	
+}
 
-    SDL_Rect sizeRect;
+void Drawer::DrawText(const char* text, const char* fontPath, const int x, const int y) const
+{
+	TTF_Font* font = TTF_OpenFont(fontPath, 24);
+
+	const SDL_Color fg = {255,255,0,255};
+	SDL_Surface* surface = TTF_RenderText_Blended(font, text, fg);
+
+	SDL_Texture* optimizedSurface = SDL_CreateTextureFromSurface(m_renderer, surface);
+
+	SDL_Rect sizeRect;
     sizeRect.x = 0 ;
     sizeRect.y = 0 ;
     sizeRect.w = surface->w ;
     sizeRect.h = surface->h ;
 
     SDL_Rect posRect ;
-    posRect.x = aX;
-    posRect.y = aY;
+    posRect.x = x;
+    posRect.y = y;
 	posRect.w = sizeRect.w;
 	posRect.h = sizeRect.h;
 
-	SDL_RenderCopy(myRenderer, optimizedSurface, &sizeRect, &posRect);
+	SDL_RenderCopy(m_renderer, optimizedSurface, &sizeRect, &posRect);
+	SDL_DestroyTexture(optimizedSurface);
+	SDL_FreeSurface(surface);
+	TTF_CloseFont(font);
+}
+
+void Drawer::DrawTextAligned(const char* text, const char* fontPath, const int fontSize) const
+{
+	TTF_Font* font = TTF_OpenFont(fontPath, fontSize);
+
+	const SDL_Color fg = {255,255,0,255};
+	SDL_Surface* surface = TTF_RenderText_Blended(font, text, fg);
+
+	SDL_Texture* optimizedSurface = SDL_CreateTextureFromSurface(m_renderer, surface);
+
+	SDL_Rect sizeRect;
+    sizeRect.x = 0 ;
+    sizeRect.y = 0 ;
+    sizeRect.w = surface->w ;
+    sizeRect.h = surface->h ;
+
+    SDL_Rect posRect;
+	int w, h;
+	SDL_GetWindowSize(m_window, &w, &h);
+    posRect.x = (w - sizeRect.w) / 2;
+    posRect.y = (h - sizeRect.h) / 2;
+	posRect.w = sizeRect.w;
+	posRect.h = sizeRect.h;
+
+	SDL_RenderCopy(m_renderer, optimizedSurface, &sizeRect, &posRect);
 	SDL_DestroyTexture(optimizedSurface);
 	SDL_FreeSurface(surface);
 	TTF_CloseFont(font);

@@ -2,12 +2,12 @@
 #define STATICGAMEENTITY_H
 
 #include "GameEntity.h"
-#include "Vector2f.h"
+#include "Vector2.h"
 
 class StaticGameEntity : public GameEntity
 {
 public:
-	StaticGameEntity(Vector2f aPosition, const char* anImage);
+	StaticGameEntity(Vector2i position, const char* image);
 	~StaticGameEntity(void);
 };
 
