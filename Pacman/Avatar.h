@@ -11,7 +11,7 @@
 #define AVATAR_UP {"open_up_32.png", "closed_up_32.png"}
 #define AVATAR_DOWN {"open_down_32.png", "closed_down_32.png"}
 
-enum Movement
+enum Direction
 {
 	STOP,
 	UP,
@@ -29,14 +29,15 @@ public:
 	void Update(float dt, World* world) override;
 	bool CanChangeDirection(int startCoord, int endCoord, bool isOpposite) const;
 	void ChangeDirection(Vector2i& newDirection);
-	void SetMovement(Movement newMovement, World* world);
+	void SetMovement(Direction newMovement, World* world);
 	void Die(World* world) override;
+	Direction GetDirection() const;
 
 private:
 	bool m_powerUp;
-	TimeLine* m_timeLine;
-	Movement m_currentMovement; // movement direction set by first directional key press
-	Movement m_nextMovement; // this field stores direction from second key press, to achieve same behavior as in original game
+	TimeLine m_timeLine;
+	Direction m_currentMovement; // movement direction set by first directional key press
+	Direction m_nextMovement; // this field stores direction from second key press, to achieve same behavior as in original game
 };
 
 #endif //AVATAR_H

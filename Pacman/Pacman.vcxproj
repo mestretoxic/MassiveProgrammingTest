@@ -132,15 +132,14 @@
     <ClCompile Include="MovableGameEntity.cpp" />
     <ClCompile Include="Pacman.cpp" />
     <ClCompile Include="Pathfinder.cpp" />
+    <ClCompile Include="PathmapTile.cpp" />
     <ClCompile Include="World.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Avatar.h" />
-    <ClInclude Include="BigDot.h" />
-    <ClInclude Include="Cherry.h" />
-    <ClInclude Include="Dot.h" />
     <ClInclude Include="Drawer.h" />
     <ClInclude Include="GameEntity.h" />
+    <ClInclude Include="Gate.h" />
     <ClInclude Include="Ghost.h" />
     <ClInclude Include="MovableGameEntity.h" />
     <ClInclude Include="Pacman.h" />

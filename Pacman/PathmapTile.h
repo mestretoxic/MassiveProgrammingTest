@@ -1,25 +1,42 @@
 #ifndef PATHMAPTILE_H
 #define PATHMAPTILE_H
 
-struct PathmapTile
-{
-	PathmapTile(int x, int y, bool isBlockingFlag)
-	: x(x)
-	, y(y)
-	, isBlockingFlag(isBlockingFlag)
-	, isVisitedFlag(false)
-	{
-	}
+#include "GameEntity.h"
+#include "Pathfinder.h"
 
-	int x;
-	int y;
-	bool isBlockingFlag;
-	bool isVisitedFlag;
+#define DOT_IMAGE "Small_Dot_32.png"
+#define BIG_DOT_IMAGE "Big_Dot_32.png"
+
+class PathmapTile : public GameEntity
+{
+	friend class World;
+	friend class Pathfinder;
+public:
+	PathmapTile(Vector2i position, bool isBlocking, bool isSpawn, bool hasDot, bool hasBigDot);
+
+	void Draw(Drawer* drawer) override;
+	void EatDot();
+	void EatBigDot();
+	void EatCherry();
+	bool IsBlockingTile() const;
+	bool IsSpawnTile() const;
+	int GetX() const;
+	int GetY() const;
+	bool HasDot() const;
+	bool HasBigDot() const;
+	bool HasCherry() const;
+
+private:
+	bool m_isBlockingTile;
+	bool m_isSpawnTile;
+	bool m_hasDot;
+	bool m_hasBigDot;
+	bool m_hasCherry;
+	int m_x;
+	int m_y;
+
+	//accessible in Pathfinder and World
+	bool visited;
 };
-
-inline bool operator==(const PathmapTile& lhs, const PathmapTile& rhs)
-{
-	return lhs.x == rhs.x && lhs.y == rhs.y;
-}
 
 #endif // PATHMAPTILE_H

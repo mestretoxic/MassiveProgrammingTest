@@ -76,7 +76,7 @@ public:
 
 	T Length() const
 	{
-		return std::sqrt(x*x + y*y);
+		return static_cast<T>(std::sqrt(x * x + y * y));
 	}
 
 	void Normalize()

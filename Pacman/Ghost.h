@@ -23,36 +23,44 @@ enum GhostType
 	INKY
 };
 
+enum GhostState
+{
+	DEFAULT,
+	VULNERABLE,
+	DEAD
+};
+
 class Ghost : public MovableGameEntity
 {
 public:
-	Ghost(GhostType type, const Vector2i& position);
+	Ghost(GhostType type, const Vector2i& position, float spawnDelay);
+	~Ghost();
 
 	bool IsDead() const
 	{
-		return m_isDead;
+		return m_state == DEAD;
 	}
 	bool IsVulnerable() const
 	{
-		return m_isVulnerable;
+		return m_state == VULNERABLE;
 	}
+
+	void SetVulnerable(const bool value);
+	void Reset();
 	void Die(World* world) override;
+	void UpdatePathfinding(World* world);
 	void Update(float dt, World* world) override;
 	void Draw(Drawer* drawer) override;
-	void SetVulnerable(const bool value)
-	{
-		m_isVulnerable = value;
-	}
 
 private:
 	GhostType m_type;
-	int m_desiredMovementX;
-	int m_desiredMovementY;
-	bool m_isVulnerable;
-	bool m_isDead;
+	GhostState m_state;
 
 	std::list<PathmapTile*> m_path;
-
+	float m_pathUpdatePeriod; //ms
+	float m_pathUpdateElapsed;
+	float m_spawnTimer;
+	Vector2i m_startPosition;
 };
 
 #endif // GHOST_H

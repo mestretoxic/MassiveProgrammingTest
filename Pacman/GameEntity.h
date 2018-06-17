@@ -18,8 +18,12 @@ public:
 	}
 
 	void SetPosition(const Vector2i& position);
+	Vector2i GetCurrentTilePosition() const;
+	int GetCurrentTileX() const;
+	int GetCurrentTileY() const;
+	bool IsInTileCenter() const;
 
-	virtual bool Intersect(const GameEntity* entity);
+	virtual bool Intersect(const GameEntity* entity, const float tolerance = 10.f);
 	virtual void Draw(Drawer* drawer);
 	virtual void Update(float dt, World* world);
 

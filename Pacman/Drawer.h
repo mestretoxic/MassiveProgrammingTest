@@ -20,7 +20,7 @@ struct SurfaceData
 	, texture(pTexture) {}
 
 	~SurfaceData() {
-		SAFE_DELETE(surface);
+		SDL_FreeSurface(surface);
 		SDL_DestroyTexture(texture);
 	}
 };

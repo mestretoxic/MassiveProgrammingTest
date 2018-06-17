@@ -22,11 +22,7 @@ Drawer::Drawer(SDL_Window* window, SDL_Renderer* renderer)
 {
 }
 
-Drawer::~Drawer()
-{
-	//SDL_DestroyWindow(m_window);
-	//SDL_DestroyRenderer(m_renderer);
-}
+Drawer::~Drawer() = default;
 
 bool Drawer::Init() const
 {
@@ -56,6 +52,7 @@ SurfaceData* Drawer::GetSurfaceData(const char* imagePath)
 
 void Drawer::Draw(const char* image, const int pixelX, const int pixelY)
 {
+	assert(image && "Image is null");
 	const SurfaceData* surfaceData = GetSurfaceData(image);
 	SDL_Rect sizeRect;
     sizeRect.x = 0;

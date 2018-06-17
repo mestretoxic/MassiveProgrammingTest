@@ -68,16 +68,16 @@ bool Pacman::UpdateInput(SDL_Event& event) const
 				return false;
 
 			case SDLK_UP:
-				m_world->SetAvatarMovement(Movement::UP);
+				m_world->SetAvatarMovement(Direction::UP);
 				break;
 			case SDLK_DOWN:
-				m_world->SetAvatarMovement(Movement::DOWN);
+				m_world->SetAvatarMovement(Direction::DOWN);
 				break;
 			case SDLK_RIGHT:
-				m_world->SetAvatarMovement(Movement::RIGHT);
+				m_world->SetAvatarMovement(Direction::RIGHT);
 				break;
 			case SDLK_LEFT:
-				m_world->SetAvatarMovement(Movement::LEFT);
+				m_world->SetAvatarMovement(Direction::LEFT);
 				break;
 		default: ;
 		}

@@ -3,7 +3,7 @@
 #include "World.h"
 #include "Config.h"
 
-inline std::vector<const char*> GetAvatarImages(const Movement direction)
+inline std::vector<const char*> GetAvatarImages(const Direction direction)
 {
 	switch(direction)
 	{
@@ -18,15 +18,15 @@ inline std::vector<const char*> GetAvatarImages(const Movement direction)
 Avatar::Avatar(const Vector2i& start)
 : MovableGameEntity(start, "open_32.png")
 , m_powerUp(false)
+, m_timeLine(AVATAR_RIGHT, true, AVATAR_FPS)
 , m_currentMovement(STOP)
 , m_nextMovement(STOP)
 {
-	m_timeLine = new TimeLine(AVATAR_RIGHT, true, AVATAR_FPS);
 }
 
 void Avatar::Draw(Drawer* drawer)
 {
-	m_image = m_timeLine->GetImage();
+	m_image = m_timeLine.GetImage();
 	GameEntity::Draw(drawer); // using super-class method
 }
 
@@ -45,7 +45,7 @@ void Avatar::Update(const float dt, World* world)
 	{
 		direction.Normalize();
 		m_position += direction * distanceToMove;
-		m_timeLine->Update(dt);
+		m_timeLine.Update(dt);
 	}
 
 	if (m_nextMovement != m_currentMovement && IsInTileCenter())
@@ -70,10 +70,10 @@ bool Avatar::CanChangeDirection(const int startCoord, const int endCoord, const 
 void Avatar::ChangeDirection(Vector2i& newDirection)
 {
 	SetNextTile(newDirection.x, newDirection.y);
-	m_timeLine->Init(GetAvatarImages(m_currentMovement), true, AVATAR_FPS);
+	m_timeLine.Init(GetAvatarImages(m_currentMovement), true, AVATAR_FPS);
 }
 
-void Avatar::SetMovement(const Movement newMovement, World* world)
+void Avatar::SetMovement(const Direction newMovement, World* world)
 {
 	bool canUpdate = false;
 	const auto start = Vector2i(GetCurrentTileX(), GetCurrentTileY());
@@ -108,9 +108,12 @@ void Avatar::SetMovement(const Movement newMovement, World* world)
 	}
 }
 
-void Avatar::Die(World* world)
+void Avatar::Die(World*)
 {
-	SetPosition(world->GetAvatarStartPosition());
-	SetNextTile(GetCurrentTileX(), GetCurrentTileY());
 	m_currentMovement = m_nextMovement = STOP;
+}
+
+Direction Avatar::GetDirection() const
+{
+	return m_currentMovement;
 }

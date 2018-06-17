@@ -50,6 +50,7 @@
       <Filter>Game\World</Filter>
     </ClCompile>
     <ClCompile Include="Config.cpp" />
+    <ClCompile Include="PathmapTile.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Pacman.h">
@@ -57,15 +58,6 @@
     </ClInclude>
     <ClInclude Include="GameEntity.h">
       <Filter>Game\Game entities</Filter>
-    </ClInclude>
-    <ClInclude Include="BigDot.h">
-      <Filter>Game\Game entities\Static</Filter>
-    </ClInclude>
-    <ClInclude Include="Cherry.h">
-      <Filter>Game\Game entities\Static</Filter>
-    </ClInclude>
-    <ClInclude Include="Dot.h">
-      <Filter>Game\Game entities\Static</Filter>
     </ClInclude>
     <ClInclude Include="Avatar.h">
       <Filter>Game\Game entities\Movable</Filter>
@@ -97,5 +89,6 @@
     <ClInclude Include="Config.h">
       <Filter>Game</Filter>
     </ClInclude>
+    <ClInclude Include="Gate.h" />
   </ItemGroup>
 </Project>

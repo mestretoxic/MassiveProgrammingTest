@@ -13,52 +13,65 @@ bool ListDoesNotContain(PathmapTile* tileToFind, std::list<PathmapTile*>& list)
 	return true;
 }
 
-bool SortFromGhostSpawn(PathmapTile* a, PathmapTile* b)
+PathmapTile* Pathfinder::GetValidTileAt(World* world, const int x, const int y, bool ignoreSpawn)
 {
-	int la = abs(a->x - 13) + abs(a->y - 13);
-	int lb = abs(b->x - 13) + abs(b->y - 13);
-
-    return la < lb;
+	GameEntity* entity = world->GetGhostAt(x, y);
+	if (entity)
+	{
+		return nullptr;
+	}
+	PathmapTile* tile = world->GetTile(x, y);
+	if (tile && ignoreSpawn && tile->IsSpawnTile())
+	{
+		return nullptr;
+	}
+	if (tile && !tile->visited && !tile->IsBlockingTile()) 
+	{
+		return tile;
+	}
+	return nullptr;
 }
 
-bool Pathfinder::Pathfind(World* world, PathmapTile* startTile, PathmapTile* endTile, std::list<PathmapTile*>& out)
+bool Pathfinder::Pathfind(World* world, PathmapTile* startTile, PathmapTile* endTile, bool ignoreSpawn, std::list<PathmapTile*>& out)
 {
 	if (!startTile || !endTile)
 		return false;
 
-	startTile->isVisitedFlag = true;
+	startTile->visited = true;
 
-	if (startTile->isBlockingFlag)
+	if (startTile->IsBlockingTile())
 		return false;
 
 	if (startTile == endTile)
 		return true;
 
 	std::list<PathmapTile*> neighborList;
-
-	PathmapTile* up = world->GetTile(startTile->x, startTile->y - 1);
-	if (up && !up->isVisitedFlag && !up->isBlockingFlag && ListDoesNotContain(up, out))
+	PathmapTile* up = GetValidTileAt(world, startTile->GetX(), startTile->GetY() - 1, ignoreSpawn);
+	if (up && ListDoesNotContain(up, out))
 		neighborList.push_front(up);
 
-	PathmapTile* down = world->GetTile(startTile->x, startTile->y + 1);
-	if (down && !down->isVisitedFlag && !down->isBlockingFlag && ListDoesNotContain(down, out))
+	PathmapTile* down =  GetValidTileAt(world, startTile->GetX(), startTile->GetY() + 1, ignoreSpawn);
+	if (down && ListDoesNotContain(down, out))
 		neighborList.push_front(down);
 
-	PathmapTile* right = world->GetTile(startTile->x + 1, startTile->y);
-	if (right && !right->isVisitedFlag && !right->isBlockingFlag && ListDoesNotContain(right, out))
+	PathmapTile* right = GetValidTileAt(world, startTile->GetX() + 1, startTile->GetY(), ignoreSpawn);
+	if (right && ListDoesNotContain(right, out))
 		neighborList.push_front(right);
 
-	PathmapTile* left = world->GetTile(startTile->x - 1, startTile->y);
-	if (left && !left->isVisitedFlag && !left->isBlockingFlag && ListDoesNotContain(left, out))
+	PathmapTile* left = GetValidTileAt(world, startTile->GetX() - 1, startTile->GetY(), ignoreSpawn);
+	if (left && ListDoesNotContain(left, out))
 		neighborList.push_front(left);
 
-	neighborList.sort(SortFromGhostSpawn);
+	neighborList.sort([endTile](PathmapTile* a, PathmapTile* b)
+	{
+		return abs(a->GetX() - endTile->GetX()) + abs(a->GetY() - endTile->GetY()) < abs(b->GetX() - endTile->GetX()) + abs(b->GetY() - endTile->GetY());
+	});
 
 	for (auto& tile : neighborList)
 	{
 		out.push_back(tile);
 
-		if (Pathfind(world, tile, endTile, out))
+		if (Pathfind(world, tile, endTile, false, out))
 			return true;
 
 		out.pop_back();

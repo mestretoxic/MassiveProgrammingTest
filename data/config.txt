@@ -12,8 +12,9 @@ ghostStartY = 13
 #gameplay
 lives = 3
 avatarVelocity = 100
-powerupVelocity = 150
+powerupVelocity = 120
 ghostVelocity = 100
+ghostVulnerableVelocity = 80
 ghostDeadVelocity = 200
 
 #graphics

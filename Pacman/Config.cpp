@@ -14,6 +14,7 @@ INIT_VAR(Config::lives);
 INIT_VAR(Config::avatarVelocity);
 INIT_VAR(Config::powerupVelocity);
 INIT_VAR(Config::ghostVelocity);
+INIT_VAR(Config::ghostVulnerableVelocity);
 INIT_VAR(Config::ghostDeadVelocity);
 
 INIT_VAR(Config::fontMain);

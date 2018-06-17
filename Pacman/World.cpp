@@ -6,21 +6,22 @@
 #include "Pathfinder.h"
 #include "Config.h"
 #include "Ghost.h"
-#include "Dot.h"
 #include "Drawer.h"
-#include "Cherry.h"
 
 World::World()
-: m_cherry(nullptr)
+: m_gateLeft(nullptr)
+, m_gateRight(nullptr)
 , m_avatar(nullptr)
-, m_ghostGhostCounter(0.f)
+, m_vulnerableTimer(0.f)
+, m_resetTimer(0.f)
 , m_avatarStartPosition(Vector2i(0, 0))
-, m_ghostStartPosition(Vector2i(0, 0))
 {
 }
 
 World::~World()
 {
+	SAFE_DELETE(m_gateLeft);
+	SAFE_DELETE(m_gateRight);
 	SAFE_DELETE(m_avatar);
 }
 
@@ -31,40 +32,6 @@ void DrawEntities(Container list, Drawer* drawer)
 		if (entity->GetIsVisible())
 			entity->Draw(drawer);
 	}
-}
-
-template<typename T>
-bool HasIntersectedEntity(const GameEntity* lhs, T* rhs)
-{
-	if (!lhs || !rhs)
-		return false;
-
-	if (!rhs->GetIsVisible())
-		return false;
-
-	if (rhs->Intersect(lhs))
-	{
-		rhs->SetIsVisible(false);
-		return true;
-	}
-
-	return false;
-}
-
-template<typename Container>
-bool HasIntersectedEntityList(const GameEntity* pEntity, Container list)
-{
-	if (!pEntity)
-		return false;
-
-	for (auto& entity : list)
-	{
-		if (HasIntersectedEntity(pEntity, entity)) {
-			return true;
-		}
-	}
-
-	return false;
 }
 
 // Removed copy-pasted methods
@@ -82,54 +49,95 @@ void World::Init()
 			std::getline (mapFile,line);
 			for (unsigned int i = 0; i < line.length(); i++)
 			{
-				auto* tile = new PathmapTile(i, lineIndex, (line[i] == 'x'));
+				const Vector2i position = Vector2i(i, lineIndex);
+				auto* tile = new PathmapTile(
+					position,
+					line[i] == 'x',
+					line[i] == '-',
+					line[i] == '.',
+					line[i] == 'o'
+				);
 				m_pathmapTiles.push_back(tile);
+			
+				if (line[i] == '<')
+					m_gateLeft = new Gate(position);
 
-				if (line[i] == '.')
-				{
-					auto* dot = new Dot(Vector2i(i, lineIndex));
-					m_dots.push_back(dot);
-				} else if (line[i] == 'o')
-				{
-					auto* dot = new BigDot(Vector2i(i, lineIndex));
-					m_bigDots.push_back(dot);
-				}
+				if (line[i] == '>')
+					m_gateRight = new Gate(position);
 			}
-
 			lineIndex++;
 		}
 		mapFile.close();
 	}
 
+	Reset();
+}
+
+void World::Reset()
+{
+	SAFE_DELETE(m_avatar);
 	m_avatar = new Avatar(GetAvatarStartPosition());
-	m_ghosts.emplace_back(new Ghost(GhostType::BLINKY, Vector2i(11,13)));
-	m_ghosts.emplace_back(new Ghost(GhostType::INKY, Vector2i(13,13)));
+
+	auto it = std::remove_if(m_ghosts.begin(), m_ghosts.end(), [](Ghost* g) { delete g; return true; });
+	if (it != m_ghosts.end())
+		m_ghosts.clear();
+
+	m_ghosts.push_back(new Ghost(GhostType::BLINKY, Vector2i(13, 10), 1.f));
+	m_ghosts.push_back(new Ghost(GhostType::INKY, Vector2i(11, 13), 5.f));
+	m_ghosts.push_back(new Ghost(GhostType::PINKY, Vector2i(13, 13), 10.f));
+	m_ghosts.push_back(new Ghost(GhostType::CLYDE, Vector2i(15, 13), 15.f));
 }
 
 void World::Update(const float dt, Pacman* game)
 {
+	if (m_resetTimer > 0.f) {
+		m_resetTimer -= dt;
+		if (m_resetTimer <= 0.f)
+		{
+			Reset();
+			m_resetTimer = 0.f;
+		} 
+		else 
+			return;
+	} 
+
 	m_avatar->Update(dt, this);
 	
-	for (const auto& ghost : m_ghosts) ghost->Update(dt, this);
+	for (const auto& ghost : m_ghosts) 
+		ghost->Update(dt, this);
+
+	if (m_avatar->Intersect(m_gateRight, 0.5f) && m_avatar->GetDirection() == RIGHT)
+	{
+		m_avatar->SetPosition(m_gateLeft->GetCurrentTilePosition());
+		m_avatar->SetMovement(RIGHT, this);
+	}
+	
+	if (m_avatar->Intersect(m_gateLeft, 0.5f) && m_avatar->GetDirection() == LEFT)
+	{
+		m_avatar->SetPosition(m_gateRight->GetCurrentTilePosition());
+		m_avatar->SetMovement(LEFT, this);
+	}
 
 	if (HasIntersectedDot(m_avatar))
 		game->m_score += 10;
 
-	m_ghostGhostCounter -= dt;
-
 	if (HasIntersectedBigDot(m_avatar))
 	{
 		game->m_score += 20;
-		m_ghostGhostCounter = 20.f;
+		m_vulnerableTimer = 20.f;
 
 		for (const auto& ghost : m_ghosts)
 			ghost->SetVulnerable(true);
 	}
 
-	if (m_ghostGhostCounter <= 0)
+	if (m_vulnerableTimer > 0.f)
 	{
-		for (const auto& ghost : m_ghosts)
-			ghost->SetVulnerable(false);
+		m_vulnerableTimer -= dt;
+		if (m_vulnerableTimer <= 0.f)
+		{
+			for (const auto& ghost : m_ghosts)
+				ghost->SetVulnerable(false);
+		}
 	}
 
 	for (const auto& ghost : m_ghosts)
@@ -148,6 +156,7 @@ void World::Update(const float dt, Pacman* game)
 			{
 				game->m_lives--;
 				m_avatar->Die(this);
+				m_resetTimer = 5.f;
 			}
 		}
 	}
@@ -156,8 +165,8 @@ void World::Update(const float dt, Pacman* game)
 void World::Draw(Drawer* drawer) const
 {
 	drawer->Draw("playfield.png");
-	DrawEntities(m_dots, drawer);
-	DrawEntities(m_bigDots, drawer);
+
+	DrawEntities(m_pathmapTiles, drawer);
 	DrawEntities(m_ghosts, drawer);
 	m_avatar->Draw(drawer);
 }
@@ -166,34 +175,54 @@ void World::Draw(Drawer* drawer) const
 bool World::TileIsValid(const int x, const int y)
 {
 	for (auto& tile : m_pathmapTiles)
-		if (x == tile->x && y == tile->y && !tile->isBlockingFlag)
+		if (x == tile->GetX() && y == tile->GetY() && !tile->IsBlockingTile() && !tile->IsSpawnTile())
 			return true;
 
 	return false;
 }
 
-// Removed copy-pasted methods
-bool World::HasIntersectedDot(const GameEntity* entity) const
+bool World::HasIntersectedDot(const Avatar* entity)
 {
-	return HasIntersectedEntityList(entity, m_dots);
+	for (auto& tile : m_pathmapTiles)
+	{
+		if (tile->Intersect(entity) && tile->HasDot()) {
+			tile->EatDot();
+			return true;
+		}
+	}
+	return false;
 }
 
-bool World::HasIntersectedBigDot(const GameEntity* entity) const
+bool World::HasIntersectedBigDot(const Avatar* entity)
 {
-	return HasIntersectedEntityList(entity, m_bigDots);
+	for (auto& tile : m_pathmapTiles)
+	{
+		if (tile->Intersect(entity) && tile->HasBigDot()) {
+			tile->EatBigDot();
+			return true;
+		}
+	}
+	return false;
 }
 
-bool World::HasIntersectedCherry(const GameEntity* entity) const
+bool World::HasIntersectedCherry(const Avatar* entity)
 {
-	return HasIntersectedEntity(entity, m_cherry);
+	for (auto& tile : m_pathmapTiles)
+	{
+		if (tile->Intersect(entity) && tile->HasCherry()) {
+			tile->EatCherry();
+			return true;
+		}
+	}
+	return false;
 }
 
-void World::GetPath(const int fromX, const int fromY, const int toX, const int toY, std::list<PathmapTile*>& out)
+void World::GetPath(const Vector2i& from, const Vector2i& to, bool ignoreSpawn, std::list<PathmapTile*>& out)
 {
-	for (auto& tile : m_pathmapTiles) 
-		tile->isVisitedFlag = false;
+	for (auto& tile : m_pathmapTiles)
+		tile->visited = false;
 
-	Pathfinder::Pathfind(this, GetTile(fromX, fromY), GetTile(toX, toY), out);
+	Pathfinder::Pathfind(this, GetTile(from.x, from.y), GetTile(to.x, to.y), ignoreSpawn, out);
 }
 
 void World::GetNextValidTile(const Vector2i& direction, Vector2i& out)
@@ -207,14 +236,18 @@ void World::GetNextValidTile(const Vector2i& direction, Vector2i& out)
 
 bool World::HasDots() const
 {
-	return !m_dots.empty() && !m_bigDots.empty();
+	return std::any_of(m_pathmapTiles.begin(), m_pathmapTiles.end(), 
+	[](PathmapTile* tile)
+	{
+		return tile->HasDot() || tile->HasBigDot();
+	});
 }
 
 PathmapTile* World::GetTile(const int x, const int y)
 {
 	for (auto& tile : m_pathmapTiles)
 	{
-		if (tile->x == x && tile->x == y)
+		if (tile->GetX() == x && tile->GetY() == y)
 		{
 			return tile;
 		}
@@ -222,22 +255,13 @@ PathmapTile* World::GetTile(const int x, const int y)
 	return nullptr;
 }
 
-void World::SetAvatarMovement(const Movement movement)
+void World::SetAvatarMovement(const Direction movement)
 {
+	if (m_resetTimer > 0.f)
+		return;
+
 	if (GetAvatar()) 
 		GetAvatar()->SetMovement(movement, this);
-}
-
-int World::GetAvatarTileX() const
-{
-	assert(m_avatar && "Avatar is null");
-	return m_avatar ? m_avatar->GetCurrentTileX() : -1;
-}
-
-int World::GetAvatarTileY() const
-{
-	assert(m_avatar && "Avatar is null");
-	return m_avatar ? m_avatar->GetCurrentTileY() : -1;
 }
 
 Avatar* World::GetAvatar() const
@@ -246,12 +270,24 @@ Avatar* World::GetAvatar() const
 	return m_avatar;
 }
 
+void World::GetAvatarPosition(Vector2i& position) const
+{
+	if (GetAvatar())
+		position.Set(GetAvatar()->GetCurrentTileX(), GetAvatar()->GetCurrentTileY());
+}
+
 Vector2i World::GetAvatarStartPosition() const
 {
 	return m_avatarStartPosition;
 }
 
-Vector2i World::GetGhostStartPosition() const
+GameEntity* World::GetGhostAt(int x, int y)
 {
-	return m_ghostStartPosition;
+	for (auto& ghost : m_ghosts)
+	{
+		if (ghost->GetCurrentTileX() == x && ghost->GetCurrentTileY() == y)
+			return ghost;
+	}
+
+	return nullptr;
 }

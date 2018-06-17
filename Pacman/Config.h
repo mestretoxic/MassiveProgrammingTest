@@ -8,25 +8,25 @@
 #include <SDL_stdinc.h>
 #include <cassert>
 
-#define MSG_MALFORMED_CONFIG "Malformed Config file!"
+#define MSG_VAR_NOT_INITIALIZED "WARNING: Variable '%s' not present in config file\n"
+#define MSG_MALFORMED_CONFIG "ERROR: Malformed Config file!"
 
-#define GET_INT_VAR(name) {								\
-	bool exists = vars.count(#name) != 0;				\
-	assert(exists && MSG_MALFORMED_CONFIG);				\
+#define WARNING(name) if (vars.count(#name) == 0) { printf(MSG_VAR_NOT_INITIALIZED, #name); } else {
+
+#define GET_INT_VAR(name) 								\
+	WARNING(name)										\
 	std::string value = vars.at(#name);					\
 	name = std::strtol(value.c_str(), nullptr, 10);		\
 }														\
 
-#define GET_FLOAT_VAR(name) {							\
-	bool exists = vars.count(#name) != 0;				\
-	assert(exists && MSG_MALFORMED_CONFIG);				\
+#define GET_FLOAT_VAR(name) 							\
+	WARNING(name)										\
 	std::string value = vars.at(#name);					\
 	name = std::strtof(value.c_str(), nullptr);			\
 }														\
 
-#define GET_STRING_VAR(name) {							\
-	bool exists = vars.count(#name) != 0;				\
-	assert(exists && MSG_MALFORMED_CONFIG);				\
+#define GET_STRING_VAR(name) 							\
+	WARNING(name)										\
 	name = vars.at(#name);								\
 }														\
 
@@ -46,6 +46,7 @@ public:
 	static float avatarVelocity;
 	static float powerupVelocity;
 	static float ghostVelocity;
+	static float ghostVulnerableVelocity;
 	static float ghostDeadVelocity;
 	static std::string fontMain;
 	static std::string fontHud;
@@ -56,7 +57,6 @@ public:
 	static bool ReadConfig(const char* fileName)
 	{
 		NameToValueMap vars;
-
 		std::string line;
 		std::ifstream file(fileName);
 		if (file.is_open())
@@ -88,6 +88,7 @@ public:
 		GET_FLOAT_VAR(avatarVelocity);
 		GET_FLOAT_VAR(powerupVelocity);
 		GET_FLOAT_VAR(ghostVelocity);
+		GET_FLOAT_VAR(ghostVulnerableVelocity);
 		GET_FLOAT_VAR(ghostDeadVelocity);
 
 		GET_STRING_VAR(fontMain);

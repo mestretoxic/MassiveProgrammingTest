@@ -12,16 +12,12 @@ public:
 	MovableGameEntity(const Vector2i& start, const char* image);
 
 	void SetNextTile(int x, int y);
-	int GetCurrentTileX() const;
-	int GetCurrentTileY() const;
 	bool IsAtDestination() const;
-	bool IsInTileCenter() const;
 	virtual void Die(World* world);
 protected:
 
 	int m_nextTileX;
 	int m_nextTileY;
-
 };
 
 #endif // MOVABLEGAMEENTITY_H
