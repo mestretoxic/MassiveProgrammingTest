@@ -3,6 +3,7 @@
 #include "PathmapTile.h"
 #include "Drawer.h"
 #include "Avatar.h"
+#include "Config.h"
 
 Ghost::Ghost(const GhostType type, const Vector2i& position)
 : MovableGameEntity(position, "ghost_32.png")
@@ -19,21 +20,21 @@ void Ghost::Die(World* world)
 {
 	m_isDead = true;
 	m_path.clear();
-	const Vector2i startPosition = World::GetGhostStartPosition();
+	const Vector2i startPosition = world->GetGhostStartPosition();
 	world->GetPath(GetCurrentTileX(), GetCurrentTileY(), startPosition.x, startPosition.y, m_path);
 }
 
 void Ghost::Update(const float dt, World* world)
 {
+	if (GetCurrentTileX() == Config::ghostStartX && GetCurrentTileY() == Config::ghostStartY)
+		m_isDead = false;
+
 	if (!m_isDead && !m_isVulnerable)
 		world->GetPath(GetCurrentTileX(), GetCurrentTileY(), world->GetAvatarTileX(), world->GetAvatarTileY(), m_path);
 
-	float speed = GHOST_VELOCITY;
+	const float speed = m_isDead ? Config::ghostDeadVelocity : Config::ghostVelocity;
 	const int nextTileX = GetCurrentTileX() + m_desiredMovementX;
 	const int nextTileY = GetCurrentTileY() + m_desiredMovementY;
-
-	if (m_isDead)
-		speed = GHOST_VELOCITY_DEAD;
 
 	if (IsAtDestination())
 	{
@@ -66,12 +67,10 @@ void Ghost::Update(const float dt, World* world)
 				m_desiredMovementX = 1;
 				m_desiredMovementY = 0;
 			}
-
-			m_isDead = false;
 		}
 	}
 
-	const Vector2f destination(static_cast<float>(m_nextTileX * World::GetTileSize()), static_cast<float>(m_nextTileY * World::GetTileSize()));
+	const Vector2f destination(float(m_nextTileX * Config::tileSize), float(m_nextTileY * Config::tileSize));
 	Vector2f direction = destination - m_position;
 
 	const float distanceToMove = dt * speed;
@@ -95,17 +94,17 @@ void Ghost::Draw(Drawer* drawer)
 	else
 		switch(m_type)
 		{
-		case RED:
-			m_image = GHOST_RED;
+		case BLINKY:
+			m_image = GHOST_BLINKY;
 			break;
-		case PINK:
-			m_image = GHOST_PINK;
+		case PINKY:
+			m_image = GHOST_PINKY;
 			break;
-		case ORANGE:
-			m_image = GHOST_ORANGE;
+		case CLYDE:
+			m_image = GHOST_CLYDE;
 			break;
-		case CYAN:
-			m_image = GHOST_CYAN;
+		case INKY:
+			m_image = GHOST_INKY;
 			break;
 		default:
 			m_image = GHOST_DEFAULT;

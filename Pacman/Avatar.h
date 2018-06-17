@@ -6,7 +6,6 @@
 #include "Timeline.h"
 
 #define AVATAR_FPS 5
-#define AVATAR_VELOCITY 100.f
 #define AVATAR_RIGHT {"open_right_32.png", "closed_right_32.png"}
 #define AVATAR_LEFT {"open_left_32.png", "closed_left_32.png"}
 #define AVATAR_UP {"open_up_32.png", "closed_up_32.png"}
@@ -31,9 +30,10 @@ public:
 	bool CanChangeDirection(int startCoord, int endCoord, bool isOpposite) const;
 	void ChangeDirection(Vector2i& newDirection);
 	void SetMovement(Movement newMovement, World* world);
-	void Die();
+	void Die(World* world) override;
 
 private:
+	bool m_powerUp;
 	TimeLine* m_timeLine;
 	Movement m_currentMovement; // movement direction set by first directional key press
 	Movement m_nextMovement; // this field stores direction from second key press, to achieve same behavior as in original game

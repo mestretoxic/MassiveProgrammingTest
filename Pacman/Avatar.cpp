@@ -1,6 +1,7 @@
 #include "Avatar.h"
 #include "Drawer.h"
 #include "World.h"
+#include "Config.h"
 
 inline std::vector<const char*> GetAvatarImages(const Movement direction)
 {
@@ -15,8 +16,10 @@ inline std::vector<const char*> GetAvatarImages(const Movement direction)
 }
 
 Avatar::Avatar(const Vector2i& start)
-	: MovableGameEntity(start, "open_32.png"), 
-	m_currentMovement(STOP), m_nextMovement(STOP)
+: MovableGameEntity(start, "open_32.png")
+, m_powerUp(false)
+, m_currentMovement(STOP)
+, m_nextMovement(STOP)
 {
 	m_timeLine = new TimeLine(AVATAR_RIGHT, true, AVATAR_FPS);
 }
@@ -29,10 +32,10 @@ void Avatar::Draw(Drawer* drawer)
 
 void Avatar::Update(const float dt, World* world)
 {
-	const Vector2f destination(float(m_nextTileX * World::GetTileSize()), float(m_nextTileY * World::GetTileSize()));
+	const Vector2f destination(float(m_nextTileX * Config::tileSize), float(m_nextTileY * Config::tileSize));
 	Vector2f direction = destination - m_position;
 
-	const float distanceToMove = dt * AVATAR_VELOCITY;
+	const float distanceToMove = dt * (m_powerUp ? Config::powerupVelocity : Config::avatarVelocity);
 
 	if (distanceToMove > direction.Length())
 	{
@@ -105,9 +108,9 @@ void Avatar::SetMovement(const Movement newMovement, World* world)
 	}
 }
 
-void Avatar::Die()
+void Avatar::Die(World* world)
 {
-	SetPosition(World::GetAvatarStartPosition());
-	SetNextTile(13, 22);
+	SetPosition(world->GetAvatarStartPosition());
+	SetNextTile(GetCurrentTileX(), GetCurrentTileY());
 	m_currentMovement = m_nextMovement = STOP;
 }

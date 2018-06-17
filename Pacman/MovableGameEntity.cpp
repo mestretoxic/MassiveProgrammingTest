@@ -1,5 +1,6 @@
 #include "MovableGameEntity.h"
 #include "World.h"
+#include "Config.h"
 
 MovableGameEntity::MovableGameEntity(const Vector2i& start, const char* image)
 : GameEntity(start, image)
@@ -31,5 +32,10 @@ int MovableGameEntity::GetCurrentTileY() const
 
 bool MovableGameEntity::IsInTileCenter() const
 {
-	return m_position.x - GetCurrentTileX() * World::GetTileSize() < 0.5 && m_position.y - GetCurrentTileY() * World::GetTileSize() < 0.5;
+	return m_position.x - (GetCurrentTileX() * Config::tileSize) < 0.5 
+			&& m_position.y - (GetCurrentTileY() * Config::tileSize) < 0.5;
+}
+
+void MovableGameEntity::Die(World*)
+{
 }

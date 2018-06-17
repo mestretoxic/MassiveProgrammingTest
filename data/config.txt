@@ -1,4 +1,23 @@
 #format is [variableName = value]
+
+#world
+worldOffsetX = 220
+worldOffsetY = 60
 tileSize = 22
+avatarStartX = 13
+avatarStartY = 22
+ghostStartX = 13
+ghostStartY = 13
+
+#gameplay
+lives = 3
+avatarVelocity = 100
+powerupVelocity = 150
+ghostVelocity = 100
+ghostDeadVelocity = 200
+
+#graphics
 fontMain = freefont-ttf\\sfd\\FreeMono.ttf
+fontMainSize = 48
 fontHud = freefont-ttf\\sfd\\FreeMono.ttf
+fontHudSize = 24

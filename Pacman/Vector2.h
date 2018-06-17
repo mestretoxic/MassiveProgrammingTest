@@ -10,10 +10,15 @@ class Vector2
 public:
 	T x, y;
 
-	Vector2(T anX, T anY)
+	Vector2(T pX, T pY)
 	{
-		x = anX;
-		y = anY;
+		Set(pX, pY);
+	}
+	
+	void Set(T pX, T pY)
+	{
+		x = pX;
+		y = pY;
 	}
 
 	bool operator==(const Vector2 &other) const 

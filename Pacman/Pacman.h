@@ -3,36 +3,35 @@
 
 #include <SDL.h>
 
-struct SDL_Surface;
 class Drawer;
 class Avatar;
 class World;
 class Ghost;
 
-#define FONT "freefont-ttf\\sfd\\FreeMono.ttf"
+#ifndef SAFE_DELETE
+#define SAFE_DELETE(p) { if (p) { delete p; p = nullptr; } }
+#endif
 
 class Pacman
 {
 public:
 	static Pacman* Create(Drawer* drawer);
-	~Pacman(void);
+	~Pacman();
 
 	bool Update(float dt, SDL_Event&);
 	bool Draw() const;
 
 	int m_lives;
 	int m_score;
+	int m_fps;
 
 private:
-	explicit Pacman(Drawer* aDrawer);
-	bool Init() const;
+	Pacman(Drawer* drawer);
+	bool Init();
 	bool UpdateInput(SDL_Event&) const;
 	bool CheckEndGameCondition() const;
 
 	Drawer* m_drawer;
-
-	int m_fps;
-
 	World* m_world;
 };
 

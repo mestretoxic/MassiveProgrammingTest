@@ -16,7 +16,7 @@ public:
 	int GetCurrentTileY() const;
 	bool IsAtDestination() const;
 	bool IsInTileCenter() const;
-
+	virtual void Die(World* world);
 protected:
 
 	int m_nextTileX;

@@ -7,7 +7,7 @@ struct PathmapTile
 	: x(x)
 	, y(y)
 	, isBlockingFlag(isBlockingFlag)
-	,isVisitedFlag(false)
+	, isVisitedFlag(false)
 	{
 	}
 
@@ -15,21 +15,11 @@ struct PathmapTile
 	int y;
 	bool isBlockingFlag;
 	bool isVisitedFlag;
-
-	static bool less(const PathmapTile& lhs, const PathmapTile& rhs)
-	{
-		return lhs < rhs;
-	}
-
-	bool operator<(const PathmapTile &other) const
-	{
-		return x * y < other.x * other.y;
-	}
-
-	bool operator>(const PathmapTile &other) const
-	{
-		return x * y > other.x * other.y;
-	}
 };
+
+inline bool operator==(const PathmapTile& lhs, const PathmapTile& rhs)
+{
+	return lhs.x == rhs.x && lhs.y == rhs.y;
+}
 
 #endif // PATHMAPTILE_H

@@ -1,7 +1,7 @@
 #include "Drawer.h"
 #include "SDL_image.h"
 #include "SDL_ttf.h"
-#include "Vector2.h"
+#include <cassert>
 
 Drawer* Drawer::Create(SDL_Window* window, SDL_Renderer* renderer)
 {
@@ -22,7 +22,11 @@ Drawer::Drawer(SDL_Window* window, SDL_Renderer* renderer)
 {
 }
 
-Drawer::~Drawer(void) = default;
+Drawer::~Drawer()
+{
+	//SDL_DestroyWindow(m_window);
+	//SDL_DestroyRenderer(m_renderer);
+}
 
 bool Drawer::Init() const
 {
@@ -68,9 +72,10 @@ void Drawer::Draw(const char* image, const int pixelX, const int pixelY)
 	SDL_RenderCopy(m_renderer, surfaceData->texture, &sizeRect, &posRect);	
 }
 
-void Drawer::DrawText(const char* text, const char* fontPath, const int x, const int y) const
+void Drawer::DrawText(const char* text, const char* fontPath, const int size, const int x, const int y) const
 {
-	TTF_Font* font = TTF_OpenFont(fontPath, 24);
+	TTF_Font* font = TTF_OpenFont(fontPath, size);
+	assert(font && "Font is null check config file");
 
 	const SDL_Color fg = {255,255,0,255};
 	SDL_Surface* surface = TTF_RenderText_Blended(font, text, fg);

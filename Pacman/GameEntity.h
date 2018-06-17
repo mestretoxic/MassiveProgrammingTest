@@ -10,38 +10,31 @@ class GameEntity
 {
 public:
 	GameEntity(const Vector2i& position, const char* image);
-	virtual ~GameEntity(void) = default;
+	virtual ~GameEntity() = default;
 
 	Vector2f GetPosition() const
 	{
 		return m_position;
 	}
-	void SetPosition(const Vector2f& position)
-	{
-		m_position = position;
-	}
-	void SetPosition(const Vector2i& position)
-	{ 	
-		m_position.x = position.x * 22.f;
-		m_position.y = position.y * 22.f;
-	}
+
+	void SetPosition(const Vector2i& position);
 
 	virtual bool Intersect(const GameEntity* entity);
 	virtual void Draw(Drawer* drawer);
 	virtual void Update(float dt, World* world);
 
-	void MarkForDelete()
+	void SetIsVisible(bool value)
 	{
-		m_isMarkedForDeleteFlag = true;
+		m_isVisible = value;
 	}
-	bool IsMarkedForDelete() const
+	bool GetIsVisible() const
 	{
-		return m_isMarkedForDeleteFlag;
+		return m_isVisible;
 	}
 
 protected:
 
-	bool m_isMarkedForDeleteFlag;
+	bool m_isVisible;
 	Vector2f m_position;
 	const char* m_image;
 };

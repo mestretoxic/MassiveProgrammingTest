@@ -2,8 +2,8 @@
 #include "SDL_image.h"
 #include "SDL_ttf.h"
 #include <cassert>
-#include "pacman.h"
-#include "drawer.h"
+#include "Pacman.h"
+#include "Drawer.h"
 
 int main(int, char **)
 {

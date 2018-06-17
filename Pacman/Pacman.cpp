@@ -22,19 +22,22 @@ Pacman* Pacman::Create(Drawer* drawer)
 }
 
 Pacman::Pacman(Drawer* drawer)
-: m_lives(3)
+: m_lives(0)
 , m_score(0)
-, m_drawer(drawer)
 , m_fps(0)
+, m_drawer(drawer)
 {
 	m_world = new World();
 }
 
-Pacman::~Pacman(void) = default;
+Pacman::~Pacman() {
+	SAFE_DELETE(m_world);
+}
 
-bool Pacman::Init() const
+bool Pacman::Init()
 {
 	Config::ReadConfig("config.txt");
+	m_lives = Config::lives;
 	m_world->Init();
 
 	return true;
@@ -65,16 +68,16 @@ bool Pacman::UpdateInput(SDL_Event& event) const
 				return false;
 
 			case SDLK_UP:
-				m_world->GetAvatar()->SetMovement(Movement::UP, m_world);
+				m_world->SetAvatarMovement(Movement::UP);
 				break;
 			case SDLK_DOWN:
-				m_world->GetAvatar()->SetMovement(Movement::DOWN, m_world);
+				m_world->SetAvatarMovement(Movement::DOWN);
 				break;
 			case SDLK_RIGHT:
-				m_world->GetAvatar()->SetMovement(Movement::RIGHT, m_world);
+				m_world->SetAvatarMovement(Movement::RIGHT);
 				break;
 			case SDLK_LEFT:
-				m_world->GetAvatar()->SetMovement(Movement::LEFT, m_world);
+				m_world->SetAvatarMovement(Movement::LEFT);
 				break;
 		default: ;
 		}
@@ -92,22 +95,28 @@ bool Pacman::Draw() const
 {
 	m_world->Draw(m_drawer);
 
+	const char* fontPath = Config::fontHud.c_str();
+	int size = Config::fontHudSize;
+
 	std::string scoreString = "Score: " + std::to_string(m_score);
-	m_drawer->DrawText(scoreString.c_str(), FONT, 20, 50);
+	m_drawer->DrawText(scoreString.c_str(), fontPath, size, 20, 50);
 
 	std::string livesString = "Lives: " + std::to_string(m_lives);
-	m_drawer->DrawText(livesString.c_str(), FONT, 20, 80);
+	m_drawer->DrawText(livesString.c_str(), fontPath, size, 20, 80);
 
 	std::string fpsString = "FPS: " + std::to_string(m_fps);
-	m_drawer->DrawText(fpsString.c_str(), FONT, 880, 50);
+	m_drawer->DrawText(fpsString.c_str(), fontPath, size, 880, 50);
+
+	fontPath = Config::fontMain.c_str();
+	size = Config::fontMainSize;
 
 	if (!m_world->HasDots())
 	{
-		m_drawer->DrawTextAligned("You win!", FONT, 48);
+		m_drawer->DrawTextAligned("You win!", fontPath, size);
 	}
 	else if (m_lives <= 0)
 	{
-		m_drawer->DrawTextAligned("You lose!", FONT, 48);	
+		m_drawer->DrawTextAligned("You lose!", fontPath, size);	
 	}
 
 	return true;

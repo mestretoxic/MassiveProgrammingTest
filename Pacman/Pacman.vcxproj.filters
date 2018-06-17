@@ -49,6 +49,7 @@
     <ClCompile Include="Pathfinder.cpp">
       <Filter>Game\World</Filter>
     </ClCompile>
+    <ClCompile Include="Config.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Pacman.h">

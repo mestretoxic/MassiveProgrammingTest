@@ -7,22 +7,20 @@
 
 class World;
 
-#define GHOST_VELOCITY 50.f
-#define GHOST_VELOCITY_DEAD 150.f
 #define GHOST_DEAD "Ghost_Dead_32.png"
 #define GHOST_VULNERABLE "Ghost_Vulnerable_32.png"
-#define GHOST_RED "ghost_32_red.png"
-#define GHOST_PINK "ghost_32_pink.png"
-#define GHOST_ORANGE "ghost_32_orange.png"
-#define GHOST_CYAN "ghost_32_cyan.png"
+#define GHOST_BLINKY "ghost_32_red.png"
+#define GHOST_PINKY "ghost_32_pink.png"
+#define GHOST_CLYDE "ghost_32_orange.png"
+#define GHOST_INKY "ghost_32_cyan.png"
 #define GHOST_DEFAULT "ghost_32.png"
 
 enum GhostType
 {
-	RED,
-	PINK,
-	ORANGE,
-	CYAN
+	BLINKY,
+	PINKY,
+	CLYDE,
+	INKY
 };
 
 class Ghost : public MovableGameEntity
@@ -38,7 +36,7 @@ public:
 	{
 		return m_isVulnerable;
 	}
-	void Die(World* world);
+	void Die(World* world) override;
 	void Update(float dt, World* world) override;
 	void Draw(Drawer* drawer) override;
 	void SetVulnerable(const bool value)
