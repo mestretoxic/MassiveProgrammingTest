@@ -30,7 +30,7 @@ public:
 	bool CanChangeDirection(int startCoord, int endCoord, bool isOpposite) const;
 	void ChangeDirection(Vector2i& newDirection);
 	void SetMovement(Direction newMovement, World* world);
-	void Die(World* world) override;
+	void Die() override;
 	void SetPowerUp(bool value);
 	Direction GetDirection() const;
 

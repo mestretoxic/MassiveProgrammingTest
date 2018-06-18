@@ -36,7 +36,7 @@ void Ghost::Reset()
 	m_nextTileY = GetCurrentTileY();
 }
 
-void Ghost::Die(World*)
+void Ghost::Die()
 {
 	m_state = DEAD;
 }
@@ -81,9 +81,8 @@ void Ghost::UpdatePathfinding(World* world)
 
 void Ghost::Update(const float dt, World* world)
 {
-	static float elapsed = 0.f;
-	elapsed += dt;
-	if (elapsed < m_spawnTimer)
+	m_spawnTimer -= dt;
+	if (m_spawnTimer > 0.f)
 		return;
 
 	if (GetCurrentTileX() == m_startPosition.x && GetCurrentTileY() == m_startPosition.y)

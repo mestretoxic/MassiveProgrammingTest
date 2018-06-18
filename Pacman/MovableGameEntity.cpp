@@ -18,7 +18,3 @@ void MovableGameEntity::SetNextTile(const int x, const int y)
 	m_nextTileX = x;
 	m_nextTileY = y;
 }
-
-void MovableGameEntity::Die(World*)
-{
-}

@@ -24,15 +24,13 @@ public:
 	void Init();
 	void Reset();
 	void Update(float dt, Pacman* game);
-	void Draw(Drawer* drawer) const;
+	void Draw(Drawer* drawer);
 	bool TileIsValid(int x, int y);
-	bool HasIntersectedDot(const Avatar* entity);
-	bool HasIntersectedBigDot(const Avatar* entity);
-	bool HasIntersectedCherry(const Avatar* entity);
 	void GetPath(const Vector2i& from, const Vector2i& to, bool ignoreSpawn, std::list<PathmapTile*>& out);
 	void GetNextValidTile(const Vector2i& direction, Vector2i& out);
 	bool HasDots() const;
 
+	PathmapTile* GetIntersectedTile(const GameEntity* entity);
 	PathmapTile* GetTile(int x, int y);
 	GameEntity* GetGhostAt(int x, int y);
 	void SetAvatarMovement(Direction movement);
@@ -42,7 +40,7 @@ public:
 
 private:
 	std::vector<PathmapTile*> m_pathmapTiles;
-	std::vector<Ghost*> m_ghosts;
+	std::vector<Ghost> m_ghosts;
 	Gate m_gateLeft;
 	Gate m_gateRight;
 	Avatar* m_avatar;

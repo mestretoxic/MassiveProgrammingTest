@@ -13,7 +13,7 @@ public:
 
 	void SetNextTile(int x, int y);
 	bool IsAtDestination() const;
-	virtual void Die(World* world);
+	virtual void Die() = 0;
 protected:
 
 	int m_nextTileX;

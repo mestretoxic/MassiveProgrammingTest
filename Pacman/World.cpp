@@ -23,16 +23,7 @@ World::~World()
 	SAFE_DELETE(m_avatar);
 }
 
-template <typename Container>
-void DrawEntities(Container list, Drawer* drawer)
-{
-	for (const auto& entity : list) {
-		if (entity->GetIsVisible())
-			entity->Draw(drawer);
-	}
-}
-
-// Removed copy-pasted methods
+// Removed copy-pasted code
 void World::Init()
 {
 	m_avatarStartPosition.Set(Config::avatarStartX, Config::avatarStartY);
@@ -76,14 +67,11 @@ void World::Reset()
 	SAFE_DELETE(m_avatar);
 	m_avatar = new Avatar(GetAvatarStartPosition());
 
-	auto it = std::remove_if(m_ghosts.begin(), m_ghosts.end(), [](Ghost* g) { delete g; return true; });
-	if (it != m_ghosts.end())
-		m_ghosts.clear();
-
-	m_ghosts.push_back(new Ghost(GhostType::BLINKY, Vector2i(13, 10), 1.f));
-	m_ghosts.push_back(new Ghost(GhostType::INKY, Vector2i(11, 13), 5.f));
-	m_ghosts.push_back(new Ghost(GhostType::PINKY, Vector2i(13, 13), 10.f));
-	m_ghosts.push_back(new Ghost(GhostType::CLYDE, Vector2i(15, 13), 15.f));
+	m_ghosts.clear();
+	m_ghosts.emplace_back(GhostType::BLINKY, Vector2i(13, 10), 1.f);
+	m_ghosts.emplace_back(GhostType::INKY, Vector2i(11, 13), 2.f);
+	m_ghosts.emplace_back(GhostType::PINKY, Vector2i(13, 13), 3.f);
+	m_ghosts.emplace_back(GhostType::CLYDE, Vector2i(15, 13), 4.f);
 }
 
 void World::Update(const float dt, Pacman* game)
@@ -101,8 +89,8 @@ void World::Update(const float dt, Pacman* game)
 
 	m_avatar->Update(dt, this);
 	
-	for (const auto& ghost : m_ghosts) 
-		ghost->Update(dt, this);
+	for (auto& ghost : m_ghosts) 
+		ghost.Update(dt, this);
 
 	if (m_avatar->Intersect(&m_gateRight, 0.5f) && m_avatar->GetDirection() == RIGHT)
 	{
@@ -116,16 +104,27 @@ void World::Update(const float dt, Pacman* game)
 		m_avatar->SetMovement(LEFT, this);
 	}
 
-	if (HasIntersectedDot(m_avatar))
-		game->m_score += 10;
-
-	if (HasIntersectedBigDot(m_avatar))
+	PathmapTile* tile = GetIntersectedTile(m_avatar);
+	if (tile)
 	{
-		game->m_score += 20;
-		m_powerUpTimer = 10.f;
-		m_avatar->SetPowerUp(true);
-		for (const auto& ghost : m_ghosts)
-			ghost->SetVulnerable(true);
+		if (tile->HasDot())
+		{
+			game->m_score += 10;
+			tile->EatDot();
+		} 
+		else if (tile->HasBigDot())
+		{
+			game->m_score += 20;
+			m_powerUpTimer = 10.f;
+			m_avatar->SetPowerUp(true);
+			for (auto& ghost : m_ghosts)
+				ghost.SetVulnerable(true);
+		}
+		else if (tile->HasCherry())
+		{
+			game->m_score += 500;
+			tile->EatCherry();
+		}
 	}
 
 	if (m_powerUpTimer > 0.f)
@@ -134,39 +133,42 @@ void World::Update(const float dt, Pacman* game)
 		if (m_powerUpTimer <= 0.f)
 		{
 			m_avatar->SetPowerUp(false);
-			for (const auto& ghost : m_ghosts)
-				ghost->SetVulnerable(false);
+			for (auto& ghost : m_ghosts)
+				ghost.SetVulnerable(false);
 		}
 	}
 
-	for (const auto& ghost : m_ghosts)
+	for (auto& ghost : m_ghosts)
 	{
-		if (m_avatar->Intersect(ghost))
+		if (m_avatar->Intersect(&ghost))
 		{
-			if (ghost->IsDead())
+			if (ghost.IsDead())
 				continue;
 
-			if (ghost->IsVulnerable())
+			if (ghost.IsVulnerable())
 			{
 				game->m_score += 50;
-				ghost->Die(this);
+				ghost.Die();
 			}
 			else
 			{
 				game->m_lives--;
-				m_avatar->Die(this);
+				m_avatar->Die();
 				m_resetTimer = 2.5f;
 			}
 		}
 	}
 }
 
-void World::Draw(Drawer* drawer) const
+void World::Draw(Drawer* drawer)
 {
 	drawer->Draw("playfield.png");
+	for (const auto& tile : m_pathmapTiles)
+		tile->Draw(drawer);
 
-	DrawEntities(m_pathmapTiles, drawer);
-	DrawEntities(m_ghosts, drawer);
+	for (auto& ghost : m_ghosts)
+		ghost.Draw(drawer);
+
 	m_avatar->Draw(drawer);
 }
 
@@ -180,40 +182,15 @@ bool World::TileIsValid(const int x, const int y)
 	return false;
 }
 
-bool World::HasIntersectedDot(const Avatar* entity)
+PathmapTile* World::GetIntersectedTile(const GameEntity* entity)
 {
 	for (auto& tile : m_pathmapTiles)
 	{
-		if (tile->Intersect(entity) && tile->HasDot()) {
-			tile->EatDot();
-			return true;
+		if (tile->Intersect(entity)) {
+			return tile;
 		}
 	}
-	return false;
-}
-
-bool World::HasIntersectedBigDot(const Avatar* entity)
-{
-	for (auto& tile : m_pathmapTiles)
-	{
-		if (tile->Intersect(entity) && tile->HasBigDot()) {
-			tile->EatBigDot();
-			return true;
-		}
-	}
-	return false;
-}
-
-bool World::HasIntersectedCherry(const Avatar* entity)
-{
-	for (auto& tile : m_pathmapTiles)
-	{
-		if (tile->Intersect(entity) && tile->HasCherry()) {
-			tile->EatCherry();
-			return true;
-		}
-	}
-	return false;
+	return nullptr;
 }
 
 void World::GetPath(const Vector2i& from, const Vector2i& to, bool ignoreSpawn, std::list<PathmapTile*>& out)
@@ -284,8 +261,8 @@ GameEntity* World::GetGhostAt(int x, int y)
 {
 	for (auto& ghost : m_ghosts)
 	{
-		if (ghost->GetCurrentTileX() == x && ghost->GetCurrentTileY() == y)
-			return ghost;
+		if (ghost.GetCurrentTileX() == x && ghost.GetCurrentTileY() == y)
+			return &ghost;
 	}
 
 	return nullptr;

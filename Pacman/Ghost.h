@@ -47,7 +47,7 @@ public:
 
 	void SetVulnerable(const bool value);
 	void Reset();
-	void Die(World* world) override;
+	void Die() override;
 	void UpdatePathfinding(World* world);
 	void Update(float dt, World* world) override;
 	void Draw(Drawer* drawer) override;

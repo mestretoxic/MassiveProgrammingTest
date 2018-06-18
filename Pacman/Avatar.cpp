@@ -108,7 +108,7 @@ void Avatar::SetMovement(const Direction newMovement, World* world)
 	}
 }
 
-void Avatar::Die(World*)
+void Avatar::Die()
 {
 	m_currentMovement = m_nextMovement = STOP;
 }
