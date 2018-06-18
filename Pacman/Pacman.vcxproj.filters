@@ -7,12 +7,6 @@
     <Filter Include="Game\Game entities">
       <UniqueIdentifier>{f58e9c74-955c-4053-aeb9-45aeae8568c1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Game\Game entities\Static">
-      <UniqueIdentifier>{8e80d2fc-ffcf-4187-b541-d35a283721ed}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Game\Game entities\Movable">
-      <UniqueIdentifier>{534d0c22-4923-4d78-b772-8511e1871aa9}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Game\World">
       <UniqueIdentifier>{cf8fdefa-6d25-49ff-99c5-564e289a7b61}</UniqueIdentifier>
     </Filter>
@@ -30,15 +24,6 @@
     <ClCompile Include="GameEntity.cpp">
       <Filter>Game\Game entities</Filter>
     </ClCompile>
-    <ClCompile Include="Avatar.cpp">
-      <Filter>Game\Game entities\Movable</Filter>
-    </ClCompile>
-    <ClCompile Include="Ghost.cpp">
-      <Filter>Game\Game entities\Movable</Filter>
-    </ClCompile>
-    <ClCompile Include="MovableGameEntity.cpp">
-      <Filter>Game\Game entities\Movable</Filter>
-    </ClCompile>
     <ClCompile Include="World.cpp">
       <Filter>Game\World</Filter>
     </ClCompile>
@@ -50,7 +35,21 @@
       <Filter>Game\World</Filter>
     </ClCompile>
     <ClCompile Include="Config.cpp" />
-    <ClCompile Include="PathmapTile.cpp" />
+    <ClCompile Include="PathmapTile.cpp">
+      <Filter>Game\World</Filter>
+    </ClCompile>
+    <ClCompile Include="Avatar.cpp">
+      <Filter>Game\Game entities</Filter>
+    </ClCompile>
+    <ClCompile Include="Ghost.cpp">
+      <Filter>Game\Game entities</Filter>
+    </ClCompile>
+    <ClCompile Include="MovableGameEntity.cpp">
+      <Filter>Game\Game entities</Filter>
+    </ClCompile>
+    <ClCompile Include="FontCache.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Pacman.h">
@@ -58,15 +57,6 @@
     </ClInclude>
     <ClInclude Include="GameEntity.h">
       <Filter>Game\Game entities</Filter>
-    </ClInclude>
-    <ClInclude Include="Avatar.h">
-      <Filter>Game\Game entities\Movable</Filter>
-    </ClInclude>
-    <ClInclude Include="Ghost.h">
-      <Filter>Game\Game entities\Movable</Filter>
-    </ClInclude>
-    <ClInclude Include="MovableGameEntity.h">
-      <Filter>Game\Game entities\Movable</Filter>
     </ClInclude>
     <ClInclude Include="PathmapTile.h">
       <Filter>Game\World</Filter>
@@ -77,9 +67,6 @@
     <ClInclude Include="Drawer.h">
       <Filter>Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="Timeline.h">
-      <Filter>Game\Game entities\Movable</Filter>
-    </ClInclude>
     <ClInclude Include="Vector2.h">
       <Filter>Math</Filter>
     </ClInclude>
@@ -89,6 +76,23 @@
     <ClInclude Include="Config.h">
       <Filter>Game</Filter>
     </ClInclude>
-    <ClInclude Include="Gate.h" />
+    <ClInclude Include="Avatar.h">
+      <Filter>Game\Game entities</Filter>
+    </ClInclude>
+    <ClInclude Include="Ghost.h">
+      <Filter>Game\Game entities</Filter>
+    </ClInclude>
+    <ClInclude Include="MovableGameEntity.h">
+      <Filter>Game\Game entities</Filter>
+    </ClInclude>
+    <ClInclude Include="Timeline.h">
+      <Filter>Game\Game entities</Filter>
+    </ClInclude>
+    <ClInclude Include="FontCache.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Gate.h">
+      <Filter>Game\Game entities</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

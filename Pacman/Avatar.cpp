@@ -113,6 +113,11 @@ void Avatar::Die(World*)
 	m_currentMovement = m_nextMovement = STOP;
 }
 
+void Avatar::SetPowerUp(const bool value)
+{
+	m_powerUp = value;
+}
+
 Direction Avatar::GetDirection() const
 {
 	return m_currentMovement;

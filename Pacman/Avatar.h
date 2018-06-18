@@ -31,6 +31,7 @@ public:
 	void ChangeDirection(Vector2i& newDirection);
 	void SetMovement(Direction newMovement, World* world);
 	void Die(World* world) override;
+	void SetPowerUp(bool value);
 	Direction GetDirection() const;
 
 private:

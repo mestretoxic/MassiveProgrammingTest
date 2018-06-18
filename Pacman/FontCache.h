@@ -2,17 +2,16 @@
 #include <SDL_ttf.h>
 #include <map>
 
+typedef std::map<int, TTF_Font*> FontSizeMap;
+typedef std::map<const char*, FontSizeMap> FontNameMap;
+
 class FontCache
 {
 public:
-		/**
-	 * \brief Cache font data
-	 * \param fontPath 
-	 * \param fontSize 
-	 * \return always valid pointer
-	 */
-	static TTF_Font* GetFontData(const char* fontPath, int fontSize);
+	FontCache() = default;
+	~FontCache();
+	TTF_Font* GetFont(const char* fontPath, int fontSize);
 private:
-	static std::map<const char*, std::map<int, TTF_Font*>> m_loadedFonts;
+	FontNameMap m_loadedFonts;
 };
 

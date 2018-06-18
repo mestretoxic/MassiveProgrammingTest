@@ -126,6 +126,7 @@
     <ClCompile Include="Avatar.cpp" />
     <ClCompile Include="Config.cpp" />
     <ClCompile Include="Drawer.cpp" />
+    <ClCompile Include="FontCache.cpp" />
     <ClCompile Include="GameEntity.cpp" />
     <ClCompile Include="Ghost.cpp" />
     <ClCompile Include="main.cpp" />
@@ -138,6 +139,7 @@
   <ItemGroup>
     <ClInclude Include="Avatar.h" />
     <ClInclude Include="Drawer.h" />
+    <ClInclude Include="FontCache.h" />
     <ClInclude Include="GameEntity.h" />
     <ClInclude Include="Gate.h" />
     <ClInclude Include="Ghost.h" />

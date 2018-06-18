@@ -1,31 +1,36 @@
 #include "FontCache.h"
 #include <cassert>
 
-inline TTF_Font* CreateFont(const char* fontPath, const int fontSize)
+FontCache::~FontCache()
 {
-	const auto font = TTF_OpenFont(fontPath, fontSize);
-	assert(font && "Invalid font path!");
-
-	return font;
+	for (auto& it : m_loadedFonts)
+	{
+		FontSizeMap& fontMap = it.second;
+		for (auto& jt : fontMap) {
+			TTF_CloseFont(jt.second);
+		}
+	}
+	m_loadedFonts.clear();
 }
 
-TTF_Font* FontCache::GetFontData(const char* fontPath, const int fontSize)
+TTF_Font* FontCache::GetFont(const char* fontPath, const int fontSize)
 {
-	const auto itFontPath = m_loadedFonts.find(fontPath);
-	if (itFontPath != m_loadedFonts.end())
+	assert(fontPath && "Invalid font path!");
+
+	TTF_Font* font = nullptr;
+	const auto fontMapIt = m_loadedFonts.find(fontPath);
+	if (fontMapIt != m_loadedFonts.end())
 	{
-		auto mapFontSize = itFontPath->second;
-		const auto itFontSize = mapFontSize.find(fontSize);
-		if (itFontSize != mapFontSize.end())
-		{
-			return itFontSize->second;
-		} else
-		{
-			mapFontSize[fontSize] = CreateFont(fontPath, fontSize);
-		}
-	} else
-	{
-		m_loadedFonts[fontPath][fontSize] = CreateFont(fontPath, fontSize);
+		auto fontSizeMap = fontMapIt->second;
+		const auto fontSizeMapIt = fontSizeMap.find(fontSize);
+		if (fontSizeMapIt != fontSizeMap.end())
+			font = fontSizeMapIt->second;
 	}
-	return m_loadedFonts.at(fontPath).at(fontSize);
+
+	if (!font) {
+		font = TTF_OpenFont(fontPath, fontSize);
+		m_loadedFonts[fontPath][fontSize] = font;
+	}
+
+	return font;
 }

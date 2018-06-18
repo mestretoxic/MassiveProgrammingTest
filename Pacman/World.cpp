@@ -9,10 +9,10 @@
 #include "Drawer.h"
 
 World::World()
-: m_gateLeft(nullptr)
-, m_gateRight(nullptr)
+: m_gateLeft(Vector2i(0, 0))
+, m_gateRight(Vector2i(0, 0))
 , m_avatar(nullptr)
-, m_vulnerableTimer(0.f)
+, m_powerUpTimer(0.f)
 , m_resetTimer(0.f)
 , m_avatarStartPosition(Vector2i(0, 0))
 {
@@ -20,8 +20,6 @@ World::World()
 
 World::~World()
 {
-	SAFE_DELETE(m_gateLeft);
-	SAFE_DELETE(m_gateRight);
 	SAFE_DELETE(m_avatar);
 }
 
@@ -60,10 +58,10 @@ void World::Init()
 				m_pathmapTiles.push_back(tile);
 			
 				if (line[i] == '<')
-					m_gateLeft = new Gate(position);
+					m_gateLeft = Gate(position);
 
 				if (line[i] == '>')
-					m_gateRight = new Gate(position);
+					m_gateRight = Gate(position);
 			}
 			lineIndex++;
 		}
@@ -106,15 +104,15 @@ void World::Update(const float dt, Pacman* game)
 	for (const auto& ghost : m_ghosts) 
 		ghost->Update(dt, this);
 
-	if (m_avatar->Intersect(m_gateRight, 0.5f) && m_avatar->GetDirection() == RIGHT)
+	if (m_avatar->Intersect(&m_gateRight, 0.5f) && m_avatar->GetDirection() == RIGHT)
 	{
-		m_avatar->SetPosition(m_gateLeft->GetCurrentTilePosition());
+		m_avatar->SetPosition(m_gateLeft.GetCurrentTilePosition());
 		m_avatar->SetMovement(RIGHT, this);
 	}
 	
-	if (m_avatar->Intersect(m_gateLeft, 0.5f) && m_avatar->GetDirection() == LEFT)
+	if (m_avatar->Intersect(&m_gateLeft, 0.5f) && m_avatar->GetDirection() == LEFT)
 	{
-		m_avatar->SetPosition(m_gateRight->GetCurrentTilePosition());
+		m_avatar->SetPosition(m_gateRight.GetCurrentTilePosition());
 		m_avatar->SetMovement(LEFT, this);
 	}
 
@@ -124,17 +122,18 @@ void World::Update(const float dt, Pacman* game)
 	if (HasIntersectedBigDot(m_avatar))
 	{
 		game->m_score += 20;
-		m_vulnerableTimer = 20.f;
-
+		m_powerUpTimer = 10.f;
+		m_avatar->SetPowerUp(true);
 		for (const auto& ghost : m_ghosts)
 			ghost->SetVulnerable(true);
 	}
 
-	if (m_vulnerableTimer > 0.f)
+	if (m_powerUpTimer > 0.f)
 	{
-		m_vulnerableTimer -= dt;
-		if (m_vulnerableTimer <= 0.f)
+		m_powerUpTimer -= dt;
+		if (m_powerUpTimer <= 0.f)
 		{
+			m_avatar->SetPowerUp(false);
 			for (const auto& ghost : m_ghosts)
 				ghost->SetVulnerable(false);
 		}
@@ -156,7 +155,7 @@ void World::Update(const float dt, Pacman* game)
 			{
 				game->m_lives--;
 				m_avatar->Die(this);
-				m_resetTimer = 5.f;
+				m_resetTimer = 2.5f;
 			}
 		}
 	}

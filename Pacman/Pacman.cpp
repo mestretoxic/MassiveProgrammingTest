@@ -95,28 +95,46 @@ bool Pacman::Draw() const
 {
 	m_world->Draw(m_drawer);
 
-	const char* fontPath = Config::fontHud.c_str();
-	int size = Config::fontHudSize;
-
 	std::string scoreString = "Score: " + std::to_string(m_score);
-	m_drawer->DrawText(scoreString.c_str(), fontPath, size, 20, 50);
+
+	TextParams textParams;
+	textParams.fontPath = Config::fontHud.c_str();
+	textParams.size = Config::fontHudSize;
+	textParams.text = scoreString.c_str();
+	textParams.x = 20;
+	textParams.y = 50;
+
+	m_drawer->DrawText(textParams);
 
 	std::string livesString = "Lives: " + std::to_string(m_lives);
-	m_drawer->DrawText(livesString.c_str(), fontPath, size, 20, 80);
+
+	textParams.text = livesString.c_str();
+	textParams.x = 20;
+	textParams.y = 80;
+
+	m_drawer->DrawText(textParams);
 
 	std::string fpsString = "FPS: " + std::to_string(m_fps);
-	m_drawer->DrawText(fpsString.c_str(), fontPath, size, 880, 50);
 
-	fontPath = Config::fontMain.c_str();
-	size = Config::fontMainSize;
+	textParams.text = fpsString.c_str();
+	textParams.x = 880;
+	textParams.y = 50;
+
+	m_drawer->DrawText(textParams);
+
+	textParams.fontPath = Config::fontMain.c_str();
+	textParams.size = Config::fontMainSize;
+	textParams.aligned = true;
 
 	if (!m_world->HasDots())
 	{
-		m_drawer->DrawTextAligned("You win!", fontPath, size);
+		textParams.text = "You win!";
+		m_drawer->DrawText(textParams);
 	}
 	else if (m_lives <= 0)
 	{
-		m_drawer->DrawTextAligned("You lose!", fontPath, size);	
+		textParams.text = "You lose!";
+		m_drawer->DrawText(textParams);	
 	}
 
 	return true;

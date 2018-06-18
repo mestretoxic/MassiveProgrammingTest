@@ -43,10 +43,10 @@ public:
 private:
 	std::vector<PathmapTile*> m_pathmapTiles;
 	std::vector<Ghost*> m_ghosts;
-	Gate* m_gateLeft;
-	Gate* m_gateRight;
+	Gate m_gateLeft;
+	Gate m_gateRight;
 	Avatar* m_avatar;
-	float m_vulnerableTimer;
+	float m_powerUpTimer;
 	float m_resetTimer;
 	Vector2i m_avatarStartPosition;
 };

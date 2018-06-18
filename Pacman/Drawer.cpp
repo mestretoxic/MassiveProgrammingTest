@@ -2,6 +2,8 @@
 #include "SDL_image.h"
 #include "SDL_ttf.h"
 #include <cassert>
+#include "FontCache.h"
+#include "Pacman.h"
 
 Drawer* Drawer::Create(SDL_Window* window, SDL_Renderer* renderer)
 {
@@ -69,59 +71,35 @@ void Drawer::Draw(const char* image, const int pixelX, const int pixelY)
 	SDL_RenderCopy(m_renderer, surfaceData->texture, &sizeRect, &posRect);	
 }
 
-void Drawer::DrawText(const char* text, const char* fontPath, const int size, const int x, const int y) const
+void Drawer::DrawText(const TextParams& textParams)
 {
-	TTF_Font* font = TTF_OpenFont(fontPath, size);
-	assert(font && "Font is null check config file");
+	TTF_Font* font = m_fontCache.GetFont(textParams.fontPath, textParams.size);
+	assert(font && "Font is null");
 
-	const SDL_Color fg = {255,255,0,255};
-	SDL_Surface* surface = TTF_RenderText_Blended(font, text, fg);
+	SDL_Surface* surface = TTF_RenderText_Blended(font, textParams.text, textParams.color);
 
 	SDL_Texture* optimizedSurface = SDL_CreateTextureFromSurface(m_renderer, surface);
 
 	SDL_Rect sizeRect;
-    sizeRect.x = 0 ;
-    sizeRect.y = 0 ;
-    sizeRect.w = surface->w ;
-    sizeRect.h = surface->h ;
-
-    SDL_Rect posRect ;
-    posRect.x = x;
-    posRect.y = y;
+    sizeRect.x = 0;
+    sizeRect.y = 0;
+    sizeRect.w = surface->w;
+    sizeRect.h = surface->h;
+		
+	SDL_Rect posRect;
+	if (textParams.aligned) {
+		int w, h;
+		SDL_GetWindowSize(m_window, &w, &h);
+	    posRect.x = (w - sizeRect.w) / 2;
+	    posRect.y = (h - sizeRect.h) / 2;
+	} else {
+	    posRect.x = textParams.x;
+	    posRect.y = textParams. y;
+	}
 	posRect.w = sizeRect.w;
 	posRect.h = sizeRect.h;
 
 	SDL_RenderCopy(m_renderer, optimizedSurface, &sizeRect, &posRect);
 	SDL_DestroyTexture(optimizedSurface);
 	SDL_FreeSurface(surface);
-	TTF_CloseFont(font);
-}
-
-void Drawer::DrawTextAligned(const char* text, const char* fontPath, const int fontSize) const
-{
-	TTF_Font* font = TTF_OpenFont(fontPath, fontSize);
-
-	const SDL_Color fg = {255,255,0,255};
-	SDL_Surface* surface = TTF_RenderText_Blended(font, text, fg);
-
-	SDL_Texture* optimizedSurface = SDL_CreateTextureFromSurface(m_renderer, surface);
-
-	SDL_Rect sizeRect;
-    sizeRect.x = 0 ;
-    sizeRect.y = 0 ;
-    sizeRect.w = surface->w ;
-    sizeRect.h = surface->h ;
-
-    SDL_Rect posRect;
-	int w, h;
-	SDL_GetWindowSize(m_window, &w, &h);
-    posRect.x = (w - sizeRect.w) / 2;
-    posRect.y = (h - sizeRect.h) / 2;
-	posRect.w = sizeRect.w;
-	posRect.h = sizeRect.h;
-
-	SDL_RenderCopy(m_renderer, optimizedSurface, &sizeRect, &posRect);
-	SDL_DestroyTexture(optimizedSurface);
-	SDL_FreeSurface(surface);
-	TTF_CloseFont(font);
 }
