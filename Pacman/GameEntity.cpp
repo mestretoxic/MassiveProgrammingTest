@@ -35,23 +35,23 @@ void GameEntity::Update(float, World*)
 {
 }
 
-Vector2i GameEntity::GetCurrentTilePosition() const
+Vector2i GameEntity::GetTilePosition() const
 {
 	return Vector2i(GetX(), GetY());
 }
 
 int GameEntity::GetX() const
 {
-	return int(m_position.x / 22);
+	return int(m_position.x / Config::tileSize);
 }
 
 int GameEntity::GetY() const
 {
-	return int(m_position.y / 22);
+	return int(m_position.y / Config::tileSize);
 }
 
 bool GameEntity::IsInTileCenter() const
 {
-	return m_position.x - (GetX() * Config::tileSize) < 0.5 
-			&& m_position.y - (GetY() * Config::tileSize) < 0.5;
+	return m_position.x - (GetX() * Config::tileSize) < 0.5f
+			&& m_position.y - (GetY() * Config::tileSize) < 0.5f;
 }

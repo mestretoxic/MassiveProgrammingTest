@@ -5,8 +5,7 @@
 #include <string>
 #include <map>
 #include <utility>
-#include <SDL_stdinc.h>
-#include <cassert>
+#include "Defines.h"
 
 #define MSG_VAR_NOT_INITIALIZED "WARNING: Variable '%s' not present in config file\n"
 #define MSG_MALFORMED_CONFIG "ERROR: Malformed Config file!"
@@ -27,7 +26,7 @@
 
 #define GET_STRING_VAR(name) 							\
 	WARNING(name)										\
-	name = vars.at(#name);								\
+	name = vars.at(#name).c_str();								\
 }														\
 
 typedef std::map<std::string, std::string> NameToValueMap;
@@ -40,23 +39,27 @@ public:
 	static int tileSize;
 	static int avatarStartX;
 	static int avatarStartY;
-	static int ghostStartX;
-	static int ghostStartY;
+	static int ghostSpawnX;
+	static int ghostSpawnY;
 	static int lives;
 	static float avatarVelocity;
 	static float powerupVelocity;
 	static float ghostVelocity;
 	static float ghostVulnerableVelocity;
 	static float ghostDeadVelocity;
-	static std::string fontMain;
-	static std::string fontHud;
+	static int pointsDot;
+	static int pointsBigDot;
+	static int pointsCherry;
+	static const char* fontMain;
+	static const char* fontHud;
 
 	static int fontMainSize;
 	static int fontHudSize;
 
+	static NameToValueMap vars;
+
 	static bool ReadConfig(const char* fileName)
 	{
-		NameToValueMap vars;
 		std::string line;
 		std::ifstream file(fileName);
 		if (file.is_open())
@@ -68,10 +71,10 @@ public:
 					continue;
 
 				const auto splitAt = line.find(" = ");
-				assert(splitAt != std::string::npos && MSG_MALFORMED_CONFIG);
+				ASSERT_B((splitAt != std::string::npos), MSG_MALFORMED_CONFIG);
 				const auto varName = line.substr(0, splitAt);
 				const auto strValue = line.substr(splitAt + 3);
-				assert((!varName.empty() && !strValue.empty()) && MSG_MALFORMED_CONFIG);
+				ASSERT_B((!varName.empty() && !strValue.empty()), MSG_MALFORMED_CONFIG);
 				vars[varName] = strValue;
 			}
 			file.close();
@@ -82,14 +85,17 @@ public:
 		GET_INT_VAR(tileSize);
 		GET_INT_VAR(avatarStartX);
 		GET_INT_VAR(avatarStartY);
-		GET_INT_VAR(ghostStartX);
-		GET_INT_VAR(ghostStartY);
+		GET_INT_VAR(ghostSpawnX);
+		GET_INT_VAR(ghostSpawnY);
 		GET_INT_VAR(lives);
 		GET_FLOAT_VAR(avatarVelocity);
 		GET_FLOAT_VAR(powerupVelocity);
 		GET_FLOAT_VAR(ghostVelocity);
 		GET_FLOAT_VAR(ghostVulnerableVelocity);
 		GET_FLOAT_VAR(ghostDeadVelocity);
+		GET_INT_VAR(pointsDot);
+		GET_INT_VAR(pointsBigDot);
+		GET_INT_VAR(pointsCherry);
 
 		GET_STRING_VAR(fontMain);
 		GET_INT_VAR(fontMainSize);

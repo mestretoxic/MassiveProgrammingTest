@@ -4,14 +4,15 @@
 #include "PathmapTile.h"
 #include <list>
 
+class Ghost;
 class PathmapTile;
 
 class Pathfinder
 {
 public:
-	static bool Pathfind(World* world, PathmapTile* startTile, PathmapTile* endTile, bool ignoreSpawn, std::list<PathmapTile*>& out);
+	static bool Pathfind(World* world, const Ghost* ghost, PathmapTile* startTile, PathmapTile* endTile, bool ignoreSpawn, std::list<PathmapTile*>& out);
 private:
-	static PathmapTile* GetValidTileAt(World* world, int x, int y, bool ignoreSpawn);
+	static PathmapTile* GetValidTileAt(World* world, const Ghost* ghost, int x, int y, bool ignoreSpawn);
 };
 
 #endif

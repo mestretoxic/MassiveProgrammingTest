@@ -18,7 +18,7 @@ public:
 	}
 
 	void SetPosition(const Vector2i& position);
-	Vector2i GetCurrentTilePosition() const;
+	Vector2i GetTilePosition() const;
 	virtual int GetX() const;
 	virtual int GetY() const;
 	bool IsInTileCenter() const;

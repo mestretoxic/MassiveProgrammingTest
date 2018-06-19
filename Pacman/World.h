@@ -1,12 +1,13 @@
 #ifndef WORLD_H
 #define WORLD_H
 
-#include <list>
+#include <memory>
 #include "Vector2.h"
 #include "PathmapTile.h"
-#include "Avatar.h"
 #include "Gate.h"
 #include "Timer.h"
+#include "Avatar.h"
+#include "Config.h"
 
 class Pacman;
 class GameEntity;
@@ -14,7 +15,6 @@ class Drawer;
 class Dot;
 class BigDot;
 class Ghost;
-class Cherry;
 
 class World
 {
@@ -27,7 +27,7 @@ public:
 	void Update(float dt, Pacman* game);
 	void Draw(Drawer* drawer);
 	bool TileIsValid(int x, int y) const;
-	void GetPath(const Vector2i& from, const Vector2i& to, bool ignoreSpawn, std::list<PathmapTile*>& out);
+	void GetPath(const Ghost* ghost, const Vector2i& to, bool ignoreSpawn, std::list<PathmapTile*>& out);
 	void GetNextValidTile(const Vector2i& direction, Vector2i& out) const;
 	bool HasDots() const;
 
@@ -36,17 +36,19 @@ public:
 	Ghost* GetGhostAt(int x, int y) const;
 	void SetPowerUpActive(bool value);
 	void SetAvatarMovement(Direction movement);
-	void GetAvatarPosition(Vector2i& position) const;
+	Vector2i GetAvatarPosition() const;
+	void GetFarthestTileFromAvatar(Vector2i& to) const;
 
 private:
 	std::vector<PathmapTile*> m_pathmapTiles;
 	std::vector<Ghost*> m_ghosts;
-	Avatar* m_avatar;
-	Gate m_gateLeft;
-	Gate m_gateRight;
+	std::unique_ptr<Gate> m_gateLeft;
+	std::unique_ptr<Gate> m_gateRight;
+	std::unique_ptr<Avatar> m_avatar;
 	Timer m_powerUpTimer;
 	Timer m_resetTimer;
 	Vector2i m_avatarStartPosition;
+	Vector2i m_mapSize;
 };
 
 #endif // WORLD_H

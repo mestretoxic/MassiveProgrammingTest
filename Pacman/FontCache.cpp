@@ -1,5 +1,5 @@
 #include "FontCache.h"
-#include <cassert>
+#include "Defines.h"
 
 FontCache::~FontCache()
 {
@@ -15,7 +15,7 @@ FontCache::~FontCache()
 
 TTF_Font* FontCache::GetFont(const char* fontPath, const int fontSize)
 {
-	assert(fontPath && "Invalid font path!");
+	ASSERT_R(fontPath, "Invalid font path!");
 
 	TTF_Font* font = nullptr;
 	const auto fontMapIt = m_loadedFonts.find(fontPath);

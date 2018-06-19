@@ -1,7 +1,7 @@
 #include "Pathfinder.h"
 #include "PathmapTile.h"
-#include <list>
 #include "World.h"
+#include "Ghost.h"
 
 bool ListDoesNotContain(PathmapTile* tileToFind, std::list<PathmapTile*>& list)
 {
@@ -13,14 +13,21 @@ bool ListDoesNotContain(PathmapTile* tileToFind, std::list<PathmapTile*>& list)
 	return true;
 }
 
-PathmapTile* Pathfinder::GetValidTileAt(World* world, const int x, const int y, const bool ignoreSpawn)
+PathmapTile* Pathfinder::GetValidTileAt(World* world, const Ghost* ghost, const int x, const int y, const bool ignoreSpawn)
 {
 	Ghost* entity = world->GetGhostAt(x, y);
 	if (entity)
 		return nullptr;
 
 	PathmapTile* tile = world->GetTile(x, y);
-	if (tile && ignoreSpawn && tile->IsSpawnTile())
+	
+	if (!tile) 
+		return nullptr;
+	
+	if (ignoreSpawn && tile->IsSpawnTile())
+		return nullptr;
+
+	if (ghost->IsVulnerable() && tile->GetTilePosition() == world->GetAvatarPosition())
 		return nullptr;
 
 	if (tile && !tile->m_visited && !tile->IsBlockingTile()) 
@@ -29,7 +36,7 @@ PathmapTile* Pathfinder::GetValidTileAt(World* world, const int x, const int y, 
 	return nullptr;
 }
 
-bool Pathfinder::Pathfind(World* world, PathmapTile* startTile, PathmapTile* endTile, bool ignoreSpawn, std::list<PathmapTile*>& out)
+bool Pathfinder::Pathfind(World* world, const Ghost* ghost, PathmapTile* startTile, PathmapTile* endTile, const bool ignoreSpawn, std::list<PathmapTile*>& out)
 {
 	if (!startTile || !endTile)
 		return false;
@@ -43,19 +50,19 @@ bool Pathfinder::Pathfind(World* world, PathmapTile* startTile, PathmapTile* end
 		return true;
 
 	std::list<PathmapTile*> neighborList;
-	PathmapTile* up = GetValidTileAt(world, startTile->GetX(), startTile->GetY() - 1, ignoreSpawn);
+	PathmapTile* up = GetValidTileAt(world, ghost, startTile->GetX(), startTile->GetY() - 1, ignoreSpawn);
 	if (up && ListDoesNotContain(up, out))
 		neighborList.push_front(up);
 
-	PathmapTile* down =  GetValidTileAt(world, startTile->GetX(), startTile->GetY() + 1, ignoreSpawn);
+	PathmapTile* down =  GetValidTileAt(world, ghost, startTile->GetX(), startTile->GetY() + 1, ignoreSpawn);
 	if (down && ListDoesNotContain(down, out))
 		neighborList.push_front(down);
 
-	PathmapTile* right = GetValidTileAt(world, startTile->GetX() + 1, startTile->GetY(), ignoreSpawn);
+	PathmapTile* right = GetValidTileAt(world, ghost, startTile->GetX() + 1, startTile->GetY(), ignoreSpawn);
 	if (right && ListDoesNotContain(right, out))
 		neighborList.push_front(right);
 
-	PathmapTile* left = GetValidTileAt(world, startTile->GetX() - 1, startTile->GetY(), ignoreSpawn);
+	PathmapTile* left = GetValidTileAt(world, ghost, startTile->GetX() - 1, startTile->GetY(), ignoreSpawn);
 	if (left && ListDoesNotContain(left, out))
 		neighborList.push_front(left);
 
@@ -68,7 +75,7 @@ bool Pathfinder::Pathfind(World* world, PathmapTile* startTile, PathmapTile* end
 	{
 		out.push_back(tile);
 
-		if (Pathfind(world, tile, endTile, false, out))
+		if (Pathfind(world, ghost, tile, endTile, false, out))
 			return true;
 
 		out.pop_back();

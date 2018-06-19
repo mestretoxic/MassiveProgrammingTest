@@ -1,8 +1,8 @@
 #include "Drawer.h"
 #include "SDL_image.h"
 #include "SDL_ttf.h"
-#include <cassert>
 #include "FontCache.h"
+#include "Defines.h"
 
 Drawer* Drawer::Create(SDL_Window* window, SDL_Renderer* renderer)
 {
@@ -53,7 +53,7 @@ SurfaceData* Drawer::GetSurfaceData(const char* imagePath)
 
 void Drawer::Draw(const char* image, const int pixelX, const int pixelY)
 {
-	assert(image && "Image is null");
+	ASSERT(image, "Image is null");
 	const SurfaceData* surfaceData = GetSurfaceData(image);
 	SDL_Rect sizeRect;
     sizeRect.x = 0;
@@ -73,7 +73,7 @@ void Drawer::Draw(const char* image, const int pixelX, const int pixelY)
 void Drawer::DrawText(const TextParams& textParams)
 {
 	TTF_Font* font = m_fontCache.GetFont(textParams.fontPath, textParams.size);
-	assert(font && "Font is null");
+	ASSERT(font, "Font is null");
 
 	SDL_Surface* surface = TTF_RenderText_Blended(font, textParams.text, textParams.color);
 

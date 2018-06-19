@@ -96,5 +96,6 @@
     <ClInclude Include="Timer.h">
       <Filter>Game</Filter>
     </ClInclude>
+    <ClInclude Include="Defines.h" />
   </ItemGroup>
 </Project>

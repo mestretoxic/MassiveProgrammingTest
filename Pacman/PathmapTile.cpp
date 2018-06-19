@@ -1,6 +1,6 @@
 #include "PathmapTile.h"
 
-PathmapTile::PathmapTile(Vector2i position, bool isBlocking, bool isSpawn, bool hasDot, bool hasBigDot)
+PathmapTile::PathmapTile(const Vector2i position, const bool isBlocking, const bool isSpawn, const bool hasDot, const bool hasBigDot)
 :GameEntity(position, nullptr)
 , m_isBlockingTile(isBlocking)
 , m_isSpawnTile(isSpawn)

@@ -91,6 +91,12 @@ public:
 		if (length > 0.f)
 			*this /= length;
 	}
+
+	void Invert()
+	{
+		x = -x;
+		y = -y;
+	}
 };
 
 typedef Vector2<float> Vector2f;

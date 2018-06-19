@@ -1,5 +1,6 @@
 #ifndef DRAWER_H
 #define DRAWER_H
+
 #include <map>
 #include <SDL.h>
 #include <SDL_render.h>
@@ -17,7 +18,9 @@ struct SurfaceData
 
 	SurfaceData(SDL_Surface* pSurface, SDL_Texture* pTexture) 
 	: surface(pSurface)
-	, texture(pTexture) {}
+	, texture(pTexture)
+	{		
+	}
 
 	~SurfaceData() {
 		SDL_FreeSurface(surface);

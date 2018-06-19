@@ -6,8 +6,8 @@ worldOffsetY = 60
 tileSize = 22
 avatarStartX = 13
 avatarStartY = 22
-ghostStartX = 13
-ghostStartY = 13
+ghostSpawnX = 13
+ghostSpawnY = 13
 
 #gameplay
 lives = 3
@@ -16,6 +16,9 @@ powerupVelocity = 120
 ghostVelocity = 100
 ghostVulnerableVelocity = 80
 ghostDeadVelocity = 200
+pointsDot = 10
+pointsBigDot = 20
+pointsCherry = 100
 
 #graphics
 fontMain = freefont-ttf\\sfd\\FreeMono.ttf

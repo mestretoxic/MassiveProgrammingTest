@@ -1,12 +1,11 @@
 #include "MovableGameEntity.h"
 #include "World.h"
-#include "Config.h"
 
 MovableGameEntity::MovableGameEntity(const Vector2i& start, const char* image)
 : GameEntity(start, image)
 {
-	m_nextTileX = GetX();
-	m_nextTileY = GetY();
+	m_nextTileX = GameEntity::GetX();
+	m_nextTileY = GameEntity::GetY();
 }
 
 bool MovableGameEntity::IsAtDestination() const

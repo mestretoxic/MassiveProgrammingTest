@@ -1,12 +1,9 @@
 #include "Pacman.h"
 #include "Drawer.h"
 #include "SDL.h"
-#include <string>
-
-#include "Avatar.h"
 #include "World.h"
-#include "Ghost.h"
 #include "Config.h"
+#include "Defines.h"
 
 Pacman* Pacman::Create(Drawer* drawer)
 {
@@ -22,22 +19,21 @@ Pacman* Pacman::Create(Drawer* drawer)
 }
 
 Pacman::Pacman(Drawer* drawer)
-: m_lives(0)
+: m_drawer(drawer)
+, m_lives(0)
 , m_score(0)
 , m_fps(0)
-, m_drawer(drawer)
 {
-	m_world = new World();
 }
 
-Pacman::~Pacman() {
-	SAFE_DELETE(m_world);
-}
+Pacman::~Pacman() = default;
 
 bool Pacman::Init()
 {
 	Config::ReadConfig("config.txt");
 	m_lives = Config::lives;
+
+	m_world.reset(new World());
 	m_world->Init();
 
 	return true;
@@ -45,6 +41,8 @@ bool Pacman::Init()
 
 bool Pacman::Update(const float dt, SDL_Event& event)
 {
+	ASSERT_B(m_world, "World is null!");
+
 	if (!UpdateInput(event))
 		return false;
 
@@ -68,16 +66,16 @@ bool Pacman::UpdateInput(SDL_Event& event) const
 				return false;
 
 			case SDLK_UP:
-				m_world->SetAvatarMovement(Direction::UP);
+				m_world->SetAvatarMovement(UP);
 				break;
 			case SDLK_DOWN:
-				m_world->SetAvatarMovement(Direction::DOWN);
+				m_world->SetAvatarMovement(DOWN);
 				break;
 			case SDLK_RIGHT:
-				m_world->SetAvatarMovement(Direction::RIGHT);
+				m_world->SetAvatarMovement(RIGHT);
 				break;
 			case SDLK_LEFT:
-				m_world->SetAvatarMovement(Direction::LEFT);
+				m_world->SetAvatarMovement(LEFT);
 				break;
 		default: ;
 		}
@@ -98,7 +96,7 @@ bool Pacman::Draw() const
 	std::string scoreString = "Score: " + std::to_string(m_score);
 
 	TextParams textParams;
-	textParams.fontPath = Config::fontHud.c_str();
+	textParams.fontPath = Config::fontHud;
 	textParams.size = Config::fontHudSize;
 	textParams.text = scoreString.c_str();
 	textParams.x = 20;
@@ -122,7 +120,7 @@ bool Pacman::Draw() const
 
 	m_drawer->DrawText(textParams);
 
-	textParams.fontPath = Config::fontMain.c_str();
+	textParams.fontPath = Config::fontMain;
 	textParams.size = Config::fontMainSize;
 	textParams.aligned = true;
 

@@ -5,6 +5,10 @@
 #include "Pacman.h"
 #include "Drawer.h"
 
+#ifdef DEBUG
+#define _CRTDBG_MAP_ALLOC #include <stdlib.h> #include <crtdbg.h>
+#endif
+
 int main(int, char **)
 {
 	/* initialize SDL */
@@ -63,6 +67,9 @@ int main(int, char **)
 	IMG_Quit();
 	SDL_Quit( );
 
+#ifdef DEBUG
+	_CrtDumpMemoryLeaks();
+#endif
+
 	return 0;
 }
-

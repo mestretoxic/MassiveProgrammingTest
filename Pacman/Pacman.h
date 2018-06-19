@@ -2,19 +2,10 @@
 #define PACMAN_H
 
 #include <SDL.h>
+#include "Config.h"
 
 class Drawer;
-class Avatar;
 class World;
-class Ghost;
-
-#ifndef SAFE_DELETE
-#define SAFE_DELETE(p) { if (p) { delete p; p = nullptr; } }
-#endif
-
-#ifndef ASSERT
-#define ASSERT(exp, msg) assert(exp && msg)
-#endif
 
 class Pacman
 {
@@ -34,7 +25,7 @@ private:
 	bool CheckEndGameCondition() const;
 
 	Drawer* m_drawer;
-	World* m_world;
+	std::unique_ptr<World> m_world;
 
 	int m_lives;
 	int m_score;

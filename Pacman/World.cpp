@@ -6,6 +6,7 @@
 #include "Config.h"
 #include "Ghost.h"
 #include "Drawer.h"
+#include "Defines.h"
 
 template<typename T>
 void CleanupContainer(T& container)
@@ -23,6 +24,33 @@ void DrawEntities(T container, Drawer* drawer)
 		entity->Draw(drawer);
 }
 
+template <typename T, typename Pred>
+typename std::vector<T>::iterator BinarySearch(std::vector<T> container, Pred pred)
+{
+    auto it_l = container.begin();
+    auto it_r = container.end();
+	while (it_l <= it_r)
+    {
+        auto mid = it_l + (it_r - it_l) / 2;
+ 
+        // Check if x is present at mid
+        if (pred(*mid) == 0)
+            return mid;
+ 
+        // If x greater, ignore left half
+        if (pred(mid) < 0)
+            it_l = mid + 1;
+ 
+        // If x is smaller, ignore right half
+        else
+            it_r = mid - 1;
+    }
+ 
+    // if we reach here, then element was
+    // not present
+    return container.end();
+}
+
 template <typename T>
 T GetEntityAt(std::vector<T> container, const int x, const int y)
 {
@@ -36,18 +64,18 @@ T GetEntityAt(std::vector<T> container, const int x, const int y)
 }
 
 World::World()
-: m_avatar(nullptr)
-, m_gateLeft(Vector2i(0, 0))
-, m_gateRight(Vector2i(0, 0))
+: m_gateLeft(nullptr)
+, m_gateRight(nullptr)
+, m_avatar(nullptr)
 , m_powerUpTimer(Timer(10.f))
 , m_resetTimer(Timer(2.f))
 , m_avatarStartPosition(Vector2i(0, 0))
+, m_mapSize(0, 0)
 {
 }
 
 World::~World()
 {
-	SAFE_DELETE(m_avatar);
 	CleanupContainer(m_ghosts);
 	CleanupContainer(m_pathmapTiles);
 }
@@ -62,7 +90,7 @@ void World::Init()
 	if (mapFile.is_open())
 	{
 		int lineIndex = 0;
-		while (! mapFile.eof() )
+		while (!mapFile.eof() )
 		{
 			std::getline (mapFile,line);
 			for (unsigned int i = 0; i < line.length(); i++)
@@ -79,14 +107,16 @@ void World::Init()
 				);
 			
 				if (line[i] == '<')
-					m_gateLeft = Gate(position);
+					m_gateLeft = std::make_unique<Gate>(position);
 
 				if (line[i] == '>')
-					m_gateRight = Gate(position);
+					m_gateRight = std::make_unique<Gate>(position);
 			}
 			lineIndex++;
 		}
 		mapFile.close();
+
+		m_mapSize.Set(line.length(), lineIndex);
 	}
 
 	Reset();
@@ -94,7 +124,7 @@ void World::Init()
 
 void World::Reset()
 {
-	m_avatar = new Avatar(m_avatarStartPosition);
+	m_avatar.reset(new Avatar(m_avatarStartPosition));
 
 	CleanupContainer(m_ghosts);
 	m_ghosts.push_back(new Ghost(BLINKY, Vector2i(13, 10), 1.f));
@@ -124,40 +154,42 @@ void World::Update(const float dt, Pacman* game)
 	for (const auto& ghost : m_ghosts) 
 		ghost->Update(dt, this);
 
-	if (m_avatar->Intersect(&m_gateRight, 0.5f) && m_avatar->GetDirection() == RIGHT)
+	if (m_avatar->Intersect(m_gateRight.get(), 0.5f) && m_avatar->GetDirection() == RIGHT)
 	{
-		m_avatar->SetPosition(m_gateLeft.GetCurrentTilePosition());
+		m_avatar->SetPosition(m_gateLeft->GetTilePosition());
 		m_avatar->SetMovement(RIGHT, this);
 	}
 	
-	if (m_avatar->Intersect(&m_gateLeft, 0.5f) && m_avatar->GetDirection() == LEFT)
+	if (m_avatar->Intersect(m_gateLeft.get(), 0.5f) && m_avatar->GetDirection() == LEFT)
 	{
-		m_avatar->SetPosition(m_gateRight.GetCurrentTilePosition());
+		m_avatar->SetPosition(m_gateRight->GetTilePosition());
 		m_avatar->SetMovement(LEFT, this);
 	}
 
-	PathmapTile* tile = GetIntersectedTile(m_avatar);
+	PathmapTile* tile = GetIntersectedTile(m_avatar.get());
 	if (tile)
 	{
 		if (tile->m_hasDot)
 		{
-			game->UpdateScore(10);
+			game->UpdateScore(Config::pointsDot);
 			tile->m_hasDot = false;
 		} 
 		else if (tile->m_hasBigDot)
 		{
-			game->UpdateScore(20);
-			m_powerUpTimer.Start();
+			game->UpdateScore(Config::pointsBigDot);
+			SetPowerUpActive(true);
+			m_powerUpTimer.Restart();
 			tile->m_hasBigDot = false;
 		}
 		else if (tile->m_hasCherry)
 		{
-			game->UpdateScore(500);
+			game->UpdateScore(Config::pointsCherry);
 			tile->m_hasCherry = false;
 		}
 	}
 
-	SetPowerUpActive(m_powerUpTimer.isRunning);
+	if (m_powerUpTimer.isComplete)
+		SetPowerUpActive(false);
 
 	for (const auto& ghost : m_ghosts)
 	{
@@ -197,12 +229,31 @@ void World::SetAvatarMovement(const Direction movement)
 	if (m_resetTimer.isRunning)
 		return;
 
+	ASSERT(m_avatar, "Avatar is null!");
 	m_avatar->SetMovement(movement, this);
 }
 
-void World::GetAvatarPosition(Vector2i& position) const
+Vector2i World::GetAvatarPosition() const
 {
-	position.Set(m_avatar->GetX(), m_avatar->GetY());
+	return m_avatar ? m_avatar->GetTilePosition() : Vector2i(-1, -1);
+}
+
+void World::GetFarthestTileFromAvatar(Vector2i& to) const
+{
+	Vector2i avatarPos = GetAvatarPosition();
+	std::vector<Vector2i> corners { 
+		Vector2i(0, 0),
+		Vector2i(m_mapSize.x - 1, 0),
+		Vector2i(0, m_mapSize.y - 1),
+		Vector2i(m_mapSize.x - 1, m_mapSize.y - 1)
+	};
+
+	std::sort(corners.begin(), corners.end(), [&](const Vector2i& lhs, const Vector2i& rhs)
+	{
+		return (avatarPos - lhs).Length() > (avatarPos - rhs).Length();
+	});
+
+	to.Set(corners.front().x, corners.front().y);
 }
 
 bool World::TileIsValid(const int x, const int y) const
@@ -220,12 +271,12 @@ PathmapTile* World::GetIntersectedTile(const GameEntity* entity) const
 	return nullptr;
 }
 
-void World::GetPath(const Vector2i& from, const Vector2i& to, const bool ignoreSpawn, std::list<PathmapTile*>& out)
+void World::GetPath(const Ghost* ghost, const Vector2i& to, const bool ignoreSpawn, std::list<PathmapTile*>& out)
 {
 	for (auto& tile : m_pathmapTiles)
 		tile->m_visited = false;
 
-	Pathfinder::Pathfind(this, GetTile(from.x, from.y), GetTile(to.x, to.y), ignoreSpawn, out);
+	Pathfinder::Pathfind(this, ghost, GetTile(ghost->GetX(), ghost->GetY()), GetTile(to.x, to.y), ignoreSpawn, out);
 }
 
 void World::GetNextValidTile(const Vector2i& direction, Vector2i& out) const
