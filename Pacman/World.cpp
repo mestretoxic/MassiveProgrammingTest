@@ -25,42 +25,50 @@ void DrawEntities(T container, Drawer* drawer)
 }
 
 template <typename T, typename Pred>
-typename std::vector<T>::iterator BinarySearch(std::vector<T> container, Pred pred)
+T BinarySearch(std::vector<T> container, Pred pred)
 {
-    auto it_l = container.begin();
-    auto it_r = container.end();
-	while (it_l <= it_r)
+    auto itL = container.begin();
+    auto itR = container.end();
+	while (itL <= itR)
     {
-        auto mid = it_l + (it_r - it_l) / 2;
- 
-        // Check if x is present at mid
+        auto mid = itL + std::distance(itL, itR) / 2;
+		if (mid == container.end())
+			break;
+
         if (pred(*mid) == 0)
-            return mid;
- 
-        // If x greater, ignore left half
-        if (pred(mid) < 0)
-            it_l = mid + 1;
- 
-        // If x is smaller, ignore right half
+            return *mid;
+
+        if (pred(*mid) < 0) 
+		{
+        	itL = mid + 1;
+		}
         else
-            it_r = mid - 1;
+		{
+			if (mid == container.begin())
+				break;
+        	itR = mid - 1;
+		}
     }
  
     // if we reach here, then element was
     // not present
-    return container.end();
+    return nullptr;
 }
 
 template <typename T>
-T GetEntityAt(std::vector<T> container, const int x, const int y)
+T GetEntityAt(std::vector<T> container, const int x, const int y, const int xMax, const int yMax)
 {
-	for (const auto& entity : container)
-	{
-		if (entity->GetX() == x && entity->GetY() == y)
-			return entity;
-	}
+	if (x < 0 || y < 0 || x >= xMax || y >= yMax)
+		return nullptr;
 
-	return nullptr;
+	return BinarySearch(container, [&](auto tile)
+	{
+		if (tile->GetY() < y) return -1;
+		if (tile->GetY() == y && tile->GetX() < x) return -1;
+		if (tile->GetY() == y && tile->GetX() > x) return 1;
+		if (tile->GetY() > y) return 1;
+		return 0;
+	});
 }
 
 World::World()
@@ -97,15 +105,9 @@ void World::Init()
 			{
 				const Vector2i position = Vector2i(i, lineIndex);
 				m_pathmapTiles.push_back(
-					new PathmapTile(
-						position,
-						line[i] == 'x',
-						line[i] == '-',
-						line[i] == '.',
-						line[i] == 'o'
-					)
+					new PathmapTile(position, line[i] == 'x', line[i] == '-', line[i] == '.', line[i] == 'o')
 				);
-			
+
 				if (line[i] == '<')
 					m_gateLeft = std::make_unique<Gate>(position);
 
@@ -215,7 +217,9 @@ void World::Update(const float dt, Pacman* game)
 
 void World::Draw(Drawer* drawer)
 {
-	drawer->Draw("playfield.png");
+	ASSERT(m_avatar, "Avatar is null!");
+
+	drawer->Draw(Config::worldBitmap);
 	DrawEntities(m_pathmapTiles, drawer);
 	DrawEntities(m_ghosts, drawer);
 	for (const auto& entity : m_ghosts)
@@ -296,12 +300,12 @@ bool World::HasDots() const
 
 PathmapTile* World::GetTile(const int x, const int y) const
 {
-	return GetEntityAt(m_pathmapTiles, x, y);
+	return GetEntityAt(m_pathmapTiles, x, y, m_mapSize.x, m_mapSize.y);
 }
 
 Ghost* World::GetGhostAt(const int x, const int y) const
 {
-	return GetEntityAt(m_ghosts, x, y);
+	return GetEntityAt(m_ghosts, x, y, m_mapSize.x, m_mapSize.y);
 }
 
 void World::SetPowerUpActive(const bool value)

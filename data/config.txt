@@ -1,6 +1,7 @@
 #format is [variableName = value]
 
 #world
+worldBitmap = playfield.png
 worldOffsetX = 220
 worldOffsetY = 60
 tileSize = 22

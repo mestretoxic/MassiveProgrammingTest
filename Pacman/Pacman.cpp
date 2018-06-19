@@ -86,11 +86,15 @@ bool Pacman::UpdateInput(SDL_Event& event) const
 
 bool Pacman::CheckEndGameCondition() const
 {
+	ASSERT_B(m_world, "World is null!");
 	return !m_world->HasDots() || m_lives <= 0;
 }
 
 bool Pacman::Draw() const
 {
+	ASSERT_B(m_world, "World is null!");
+	ASSERT_B(m_drawer, "Drawer is null!");
+
 	m_world->Draw(m_drawer);
 
 	std::string scoreString = "Score: " + std::to_string(m_score);

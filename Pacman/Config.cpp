@@ -4,6 +4,7 @@
 
 NameToValueMap Config::vars;
 
+INIT_VAR(Config::worldBitmap);
 INIT_VAR(Config::worldOffsetX);
 INIT_VAR(Config::worldOffsetY);
 INIT_VAR(Config::tileSize);

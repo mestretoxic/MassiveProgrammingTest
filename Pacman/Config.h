@@ -34,6 +34,7 @@ typedef std::map<std::string, std::string> NameToValueMap;
 class Config
 {
 public:
+	static const char* worldBitmap;
 	static int worldOffsetX;
 	static int worldOffsetY;
 	static int tileSize;
@@ -80,6 +81,7 @@ public:
 			file.close();
 		}
 
+		GET_STRING_VAR(worldBitmap);
 		GET_INT_VAR(worldOffsetX);
 		GET_INT_VAR(worldOffsetY);
 		GET_INT_VAR(tileSize);
