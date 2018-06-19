@@ -13,22 +13,19 @@ bool ListDoesNotContain(PathmapTile* tileToFind, std::list<PathmapTile*>& list)
 	return true;
 }
 
-PathmapTile* Pathfinder::GetValidTileAt(World* world, const int x, const int y, bool ignoreSpawn)
+PathmapTile* Pathfinder::GetValidTileAt(World* world, const int x, const int y, const bool ignoreSpawn)
 {
-	GameEntity* entity = world->GetGhostAt(x, y);
+	Ghost* entity = world->GetGhostAt(x, y);
 	if (entity)
-	{
 		return nullptr;
-	}
+
 	PathmapTile* tile = world->GetTile(x, y);
 	if (tile && ignoreSpawn && tile->IsSpawnTile())
-	{
 		return nullptr;
-	}
-	if (tile && !tile->visited && !tile->IsBlockingTile()) 
-	{
+
+	if (tile && !tile->m_visited && !tile->IsBlockingTile()) 
 		return tile;
-	}
+
 	return nullptr;
 }
 
@@ -37,7 +34,7 @@ bool Pathfinder::Pathfind(World* world, PathmapTile* startTile, PathmapTile* end
 	if (!startTile || !endTile)
 		return false;
 
-	startTile->visited = true;
+	startTile->m_visited = true;
 
 	if (startTile->IsBlockingTile())
 		return false;

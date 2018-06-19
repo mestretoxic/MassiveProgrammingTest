@@ -24,7 +24,6 @@ class Avatar : public MovableGameEntity
 {
 public:
 	Avatar(const Vector2i& start);
-
 	void Draw(Drawer* drawer) override;
 	void Update(float dt, World* world) override;
 	bool CanChangeDirection(int startCoord, int endCoord, bool isOpposite) const;

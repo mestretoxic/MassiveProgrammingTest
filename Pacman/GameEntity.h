@@ -19,26 +19,15 @@ public:
 
 	void SetPosition(const Vector2i& position);
 	Vector2i GetCurrentTilePosition() const;
-	int GetCurrentTileX() const;
-	int GetCurrentTileY() const;
+	virtual int GetX() const;
+	virtual int GetY() const;
 	bool IsInTileCenter() const;
 
 	virtual bool Intersect(const GameEntity* entity, const float tolerance = 10.f);
 	virtual void Draw(Drawer* drawer);
 	virtual void Update(float dt, World* world);
 
-	void SetIsVisible(bool value)
-	{
-		m_isVisible = value;
-	}
-	bool GetIsVisible() const
-	{
-		return m_isVisible;
-	}
-
 protected:
-
-	bool m_isVisible;
 	Vector2f m_position;
 	const char* m_image;
 };

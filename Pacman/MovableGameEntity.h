@@ -14,6 +14,7 @@ public:
 	void SetNextTile(int x, int y);
 	bool IsAtDestination() const;
 	virtual void Die() = 0;
+	bool Move(float distanceToMove); //Returns true if actually moved
 protected:
 
 	int m_nextTileX;

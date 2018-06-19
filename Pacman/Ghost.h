@@ -4,6 +4,7 @@
 #include <list>
 #include "MovableGameEntity.h"
 #include "PathmapTile.h"
+#include "Timer.h"
 
 class World;
 
@@ -57,9 +58,8 @@ private:
 	GhostState m_state;
 
 	std::list<PathmapTile*> m_path;
-	float m_pathUpdatePeriod; //ms
-	float m_pathUpdateElapsed;
-	float m_spawnTimer;
+	Timer m_pathUpdateTimer;
+	Timer m_spawnTimer;
 	Vector2i m_startPosition;
 };
 

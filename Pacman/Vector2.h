@@ -26,19 +26,24 @@ public:
 		return x == other.x && y == other.y;
 	}
 
-	const Vector2 operator-(const Vector2 &other) const 
+	bool operator!=(const Vector2 &other) const
+	{
+		return x != other.x || y != other.y;
+	}
+
+	Vector2 operator-(const Vector2 &other) const 
 	{
 		Vector2 v(x - other.x, y - other.y);
 		return v;
 	}
 
-	const Vector2 operator+(const Vector2 &other) const 
+	Vector2 operator+(const Vector2 &other) const 
 	{
 		Vector2 v(x + other.x, y + other.y);
 		return v;
 	}
 
-	const Vector2 operator*(const Vector2& other) const 
+	Vector2 operator*(const Vector2& other) const 
 	{
 		Vector2 v(x*other.x, y*other.y);
 		return v;
@@ -68,7 +73,7 @@ public:
 		return *this;
 	}
 
-	const Vector2 operator*(const T rValue) const 
+	Vector2 operator*(const T rValue) const 
 	{
 		Vector2 v(x * rValue, y * rValue);
 		return v;

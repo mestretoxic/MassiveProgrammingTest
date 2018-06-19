@@ -1,6 +1,5 @@
 #include <fstream>
 #include <string>
-#include <cassert>
 #include "World.h"
 #include "Pacman.h"
 #include "Pathfinder.h"
@@ -8,12 +7,40 @@
 #include "Ghost.h"
 #include "Drawer.h"
 
+template<typename T>
+void CleanupContainer(T& container)
+{
+	for (auto& it : container) {
+		SAFE_DELETE(it);
+	}
+	container.clear();
+}
+
+template<typename T>
+void DrawEntities(T container, Drawer* drawer)
+{
+	for (const auto& entity : container)
+		entity->Draw(drawer);
+}
+
+template <typename T>
+T GetEntityAt(std::vector<T> container, const int x, const int y)
+{
+	for (const auto& entity : container)
+	{
+		if (entity->GetX() == x && entity->GetY() == y)
+			return entity;
+	}
+
+	return nullptr;
+}
+
 World::World()
-: m_gateLeft(Vector2i(0, 0))
+: m_avatar(nullptr)
+, m_gateLeft(Vector2i(0, 0))
 , m_gateRight(Vector2i(0, 0))
-, m_avatar(nullptr)
-, m_powerUpTimer(0.f)
-, m_resetTimer(0.f)
+, m_powerUpTimer(Timer(10.f))
+, m_resetTimer(Timer(2.f))
 , m_avatarStartPosition(Vector2i(0, 0))
 {
 }
@@ -21,6 +48,8 @@ World::World()
 World::~World()
 {
 	SAFE_DELETE(m_avatar);
+	CleanupContainer(m_ghosts);
+	CleanupContainer(m_pathmapTiles);
 }
 
 // Removed copy-pasted code
@@ -39,14 +68,15 @@ void World::Init()
 			for (unsigned int i = 0; i < line.length(); i++)
 			{
 				const Vector2i position = Vector2i(i, lineIndex);
-				auto* tile = new PathmapTile(
-					position,
-					line[i] == 'x',
-					line[i] == '-',
-					line[i] == '.',
-					line[i] == 'o'
+				m_pathmapTiles.push_back(
+					new PathmapTile(
+						position,
+						line[i] == 'x',
+						line[i] == '-',
+						line[i] == '.',
+						line[i] == 'o'
+					)
 				);
-				m_pathmapTiles.push_back(tile);
 			
 				if (line[i] == '<')
 					m_gateLeft = Gate(position);
@@ -64,33 +94,35 @@ void World::Init()
 
 void World::Reset()
 {
-	SAFE_DELETE(m_avatar);
-	m_avatar = new Avatar(GetAvatarStartPosition());
+	m_avatar = new Avatar(m_avatarStartPosition);
 
-	m_ghosts.clear();
-	m_ghosts.emplace_back(GhostType::BLINKY, Vector2i(13, 10), 1.f);
-	m_ghosts.emplace_back(GhostType::INKY, Vector2i(11, 13), 2.f);
-	m_ghosts.emplace_back(GhostType::PINKY, Vector2i(13, 13), 3.f);
-	m_ghosts.emplace_back(GhostType::CLYDE, Vector2i(15, 13), 4.f);
+	CleanupContainer(m_ghosts);
+	m_ghosts.push_back(new Ghost(BLINKY, Vector2i(13, 10), 1.f));
+	m_ghosts.push_back(new Ghost(INKY, Vector2i(11, 13), 2.f));
+	m_ghosts.push_back(new Ghost(PINKY, Vector2i(13, 13), 3.f));
+	m_ghosts.push_back(new Ghost(CLYDE, Vector2i(15, 13), 4.f));
+
+	m_resetTimer.Reset();
+	m_powerUpTimer.Reset();
 }
 
 void World::Update(const float dt, Pacman* game)
 {
-	if (m_resetTimer > 0.f) {
-		m_resetTimer -= dt;
-		if (m_resetTimer <= 0.f)
-		{
-			Reset();
-			m_resetTimer = 0.f;
-		} 
-		else 
-			return;
-	} 
+	ASSERT(m_avatar, "Avatar is null");
+
+	m_resetTimer.Update(dt);
+	m_powerUpTimer.Update(dt);
+
+	if (m_resetTimer.isRunning)
+		return;
+
+	if (m_resetTimer.isComplete)
+		Reset();
 
 	m_avatar->Update(dt, this);
 	
-	for (auto& ghost : m_ghosts) 
-		ghost.Update(dt, this);
+	for (const auto& ghost : m_ghosts) 
+		ghost->Update(dt, this);
 
 	if (m_avatar->Intersect(&m_gateRight, 0.5f) && m_avatar->GetDirection() == RIGHT)
 	{
@@ -107,54 +139,43 @@ void World::Update(const float dt, Pacman* game)
 	PathmapTile* tile = GetIntersectedTile(m_avatar);
 	if (tile)
 	{
-		if (tile->HasDot())
+		if (tile->m_hasDot)
 		{
-			game->m_score += 10;
-			tile->EatDot();
+			game->UpdateScore(10);
+			tile->m_hasDot = false;
 		} 
-		else if (tile->HasBigDot())
+		else if (tile->m_hasBigDot)
 		{
-			game->m_score += 20;
-			m_powerUpTimer = 10.f;
-			m_avatar->SetPowerUp(true);
-			for (auto& ghost : m_ghosts)
-				ghost.SetVulnerable(true);
+			game->UpdateScore(20);
+			m_powerUpTimer.Start();
+			tile->m_hasBigDot = false;
 		}
-		else if (tile->HasCherry())
+		else if (tile->m_hasCherry)
 		{
-			game->m_score += 500;
-			tile->EatCherry();
+			game->UpdateScore(500);
+			tile->m_hasCherry = false;
 		}
 	}
 
-	if (m_powerUpTimer > 0.f)
-	{
-		m_powerUpTimer -= dt;
-		if (m_powerUpTimer <= 0.f)
-		{
-			m_avatar->SetPowerUp(false);
-			for (auto& ghost : m_ghosts)
-				ghost.SetVulnerable(false);
-		}
-	}
+	SetPowerUpActive(m_powerUpTimer.isRunning);
 
-	for (auto& ghost : m_ghosts)
+	for (const auto& ghost : m_ghosts)
 	{
-		if (m_avatar->Intersect(&ghost))
+		if (m_avatar->Intersect(ghost))
 		{
-			if (ghost.IsDead())
+			if (ghost->IsDead())
 				continue;
 
-			if (ghost.IsVulnerable())
+			if (ghost->IsVulnerable())
 			{
-				game->m_score += 50;
-				ghost.Die();
+				game->UpdateScore(50);
+				ghost->Die();
 			}
 			else
 			{
-				game->m_lives--;
+				game->UpdateLives();
 				m_avatar->Die();
-				m_resetTimer = 2.5f;
+				m_resetTimer.Start();
 			}
 		}
 	}
@@ -163,45 +184,51 @@ void World::Update(const float dt, Pacman* game)
 void World::Draw(Drawer* drawer)
 {
 	drawer->Draw("playfield.png");
-	for (const auto& tile : m_pathmapTiles)
-		tile->Draw(drawer);
-
-	for (auto& ghost : m_ghosts)
-		ghost.Draw(drawer);
+	DrawEntities(m_pathmapTiles, drawer);
+	DrawEntities(m_ghosts, drawer);
+	for (const auto& entity : m_ghosts)
+		entity->Draw(drawer);
 
 	m_avatar->Draw(drawer);
 }
 
-// Tiles are sorted in m_pathmapTiles, so binary search could be more effective here
-bool World::TileIsValid(const int x, const int y)
+void World::SetAvatarMovement(const Direction movement)
 {
-	for (auto& tile : m_pathmapTiles)
-		if (x == tile->GetX() && y == tile->GetY() && !tile->IsBlockingTile() && !tile->IsSpawnTile())
-			return true;
+	if (m_resetTimer.isRunning)
+		return;
 
-	return false;
+	m_avatar->SetMovement(movement, this);
 }
 
-PathmapTile* World::GetIntersectedTile(const GameEntity* entity)
+void World::GetAvatarPosition(Vector2i& position) const
+{
+	position.Set(m_avatar->GetX(), m_avatar->GetY());
+}
+
+bool World::TileIsValid(const int x, const int y) const
+{
+	return std::any_of(m_pathmapTiles.cbegin(), m_pathmapTiles.cend(),
+		[&](const auto& tile) { return x == tile->GetX() && y == tile->GetY() && !tile->IsBlockingTile() && !tile->IsSpawnTile(); });
+}
+
+PathmapTile* World::GetIntersectedTile(const GameEntity* entity) const
 {
 	for (auto& tile : m_pathmapTiles)
-	{
-		if (tile->Intersect(entity)) {
+		if (tile->Intersect(entity))
 			return tile;
-		}
-	}
+
 	return nullptr;
 }
 
-void World::GetPath(const Vector2i& from, const Vector2i& to, bool ignoreSpawn, std::list<PathmapTile*>& out)
+void World::GetPath(const Vector2i& from, const Vector2i& to, const bool ignoreSpawn, std::list<PathmapTile*>& out)
 {
 	for (auto& tile : m_pathmapTiles)
-		tile->visited = false;
+		tile->m_visited = false;
 
 	Pathfinder::Pathfind(this, GetTile(from.x, from.y), GetTile(to.x, to.y), ignoreSpawn, out);
 }
 
-void World::GetNextValidTile(const Vector2i& direction, Vector2i& out)
+void World::GetNextValidTile(const Vector2i& direction, Vector2i& out) const
 {
 	if (TileIsValid(out.x + direction.x, out.y + direction.y))
 	{
@@ -212,58 +239,23 @@ void World::GetNextValidTile(const Vector2i& direction, Vector2i& out)
 
 bool World::HasDots() const
 {
-	return std::any_of(m_pathmapTiles.begin(), m_pathmapTiles.end(), 
-	[](PathmapTile* tile)
-	{
-		return tile->HasDot() || tile->HasBigDot();
-	});
+	return std::any_of(m_pathmapTiles.cbegin(), m_pathmapTiles.cend(),
+		[](const auto& tile) { return tile->m_hasDot || tile->m_hasBigDot; });
 }
 
-PathmapTile* World::GetTile(const int x, const int y)
+PathmapTile* World::GetTile(const int x, const int y) const
 {
-	for (auto& tile : m_pathmapTiles)
-	{
-		if (tile->GetX() == x && tile->GetY() == y)
-		{
-			return tile;
-		}
-	}
-	return nullptr;
+	return GetEntityAt(m_pathmapTiles, x, y);
 }
 
-void World::SetAvatarMovement(const Direction movement)
+Ghost* World::GetGhostAt(const int x, const int y) const
 {
-	if (m_resetTimer > 0.f)
-		return;
-
-	if (GetAvatar()) 
-		GetAvatar()->SetMovement(movement, this);
+	return GetEntityAt(m_ghosts, x, y);
 }
 
-Avatar* World::GetAvatar() const
+void World::SetPowerUpActive(const bool value)
 {
-	assert(m_avatar && "Avatar is null");
-	return m_avatar;
-}
-
-void World::GetAvatarPosition(Vector2i& position) const
-{
-	if (GetAvatar())
-		position.Set(GetAvatar()->GetCurrentTileX(), GetAvatar()->GetCurrentTileY());
-}
-
-Vector2i World::GetAvatarStartPosition() const
-{
-	return m_avatarStartPosition;
-}
-
-GameEntity* World::GetGhostAt(int x, int y)
-{
-	for (auto& ghost : m_ghosts)
-	{
-		if (ghost.GetCurrentTileX() == x && ghost.GetCurrentTileY() == y)
-			return &ghost;
-	}
-
-	return nullptr;
+	m_avatar->SetPowerUp(value);
+	for (const auto& ghost : m_ghosts)
+		ghost->SetVulnerable(value);
 }

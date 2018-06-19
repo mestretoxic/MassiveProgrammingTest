@@ -5,15 +5,16 @@
 #include "Avatar.h"
 #include "Config.h"
 
-Ghost::Ghost(const GhostType type, const Vector2i& position, float spawnDelay)
+Ghost::Ghost(const GhostType type, const Vector2i& position, const float spawnDelay)
 : MovableGameEntity(position, "ghost_32.png")
 , m_type(type)
 , m_state(DEFAULT)
-, m_pathUpdatePeriod(0.5f)
-, m_pathUpdateElapsed(m_pathUpdatePeriod)
-, m_spawnTimer(spawnDelay)
+, m_pathUpdateTimer(Timer(0.5f))
+, m_spawnTimer(Timer(spawnDelay))
 , m_startPosition(position)
 {
+	m_pathUpdateTimer.Start();
+	m_spawnTimer.Start();
 }
 
 Ghost::~Ghost()
@@ -31,9 +32,11 @@ void Ghost::SetVulnerable(const bool value)
 
 void Ghost::Reset()
 {
+	SetPosition(m_startPosition);
 	m_state = DEFAULT;
-	m_nextTileX = GetCurrentTileX();
-	m_nextTileY = GetCurrentTileY();
+	m_nextTileX = GetX();
+	m_nextTileY = GetY();
+	m_path.clear();
 }
 
 void Ghost::Die()
@@ -46,11 +49,11 @@ void Ghost::UpdatePathfinding(World* world)
 	Vector2i to(0,0);
 	bool ignoreSpawn = true;
 
-	const Vector2i currentPos(GetCurrentTileX(), GetCurrentTileY());
-	if (!IsDead() && !IsVulnerable() && world->GetTile(GetCurrentTileX(), GetCurrentTileY())->IsSpawnTile())
+	const Vector2i currentPos(GetX(), GetY());
+	if (!IsDead() && !IsVulnerable() && world->GetTile(GetX(), GetY())->IsSpawnTile())
 	{
 		ignoreSpawn = false;
-		to = Vector2i(13, 10);
+		to.Set(13, 10);
 	}
 	else if (IsDead()) 
 	{
@@ -60,7 +63,7 @@ void Ghost::UpdatePathfinding(World* world)
 	else if (IsVulnerable())
 	{
 		ignoreSpawn = false;
-		to = Vector2i(13, 13);
+		to.Set(13, 13);
 	}
 	else 
 	{
@@ -81,21 +84,23 @@ void Ghost::UpdatePathfinding(World* world)
 
 void Ghost::Update(const float dt, World* world)
 {
-	m_spawnTimer -= dt;
-	if (m_spawnTimer > 0.f)
+	m_spawnTimer.Update(dt);
+	m_pathUpdateTimer.Update(dt);
+
+	if (m_spawnTimer.isRunning)
 		return;
 
-	if (GetCurrentTileX() == m_startPosition.x && GetCurrentTileY() == m_startPosition.y)
+	if (IsDead() && GetX() == m_startPosition.x && GetY() == m_startPosition.y)
 		Reset();
 
 	bool updatePath = false;
-	m_pathUpdateElapsed -= dt;
-	if (m_pathUpdateElapsed <= 0.f) {
+	if (!m_pathUpdateTimer.isRunning)
+	{
 		updatePath = true;
-		m_pathUpdateElapsed = m_pathUpdatePeriod;
+		m_pathUpdateTimer.Restart();
 	}
 
-	float speed = 0.f;
+	float speed;
 	switch (m_state)
 	{
 		case VULNERABLE: 
@@ -119,19 +124,7 @@ void Ghost::Update(const float dt, World* world)
 		}
 	}
 
-	const Vector2f destination(float(m_nextTileX * Config::tileSize), float(m_nextTileY * Config::tileSize));
-	Vector2f direction = destination - m_position;
-
-	const float distanceToMove = dt * speed;
-	if (distanceToMove > direction.Length())
-	{
-		m_position = destination;
-	}
-	else
-	{
-		direction.Normalize();
-		m_position += direction * distanceToMove;
-	}
+	Move(speed * dt);
 }
 
 void Ghost::Draw(Drawer* drawer)
@@ -145,23 +138,23 @@ void Ghost::Draw(Drawer* drawer)
 			m_image = GHOST_VULNERABLE;
 			break;
 		default:
-			switch(m_type)
-			{
-			case BLINKY:
-				m_image = GHOST_BLINKY;
-				break;
-			case PINKY:
-				m_image = GHOST_PINKY;
-				break;
-			case CLYDE:
-				m_image = GHOST_CLYDE;
-				break;
-			case INKY:
-				m_image = GHOST_INKY;
-				break;
-			default:
-				m_image = GHOST_DEFAULT;
-			}
+		switch(m_type)
+		{
+		case BLINKY:
+			m_image = GHOST_BLINKY;
+			break;
+		case PINKY:
+			m_image = GHOST_PINKY;
+			break;
+		case CLYDE:
+			m_image = GHOST_CLYDE;
+			break;
+		case INKY:
+			m_image = GHOST_INKY;
+			break;
+		default:
+			m_image = GHOST_DEFAULT;
+		}
 	}
 
 	GameEntity::Draw(drawer); //using super-class method

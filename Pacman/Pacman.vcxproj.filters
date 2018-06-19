@@ -34,7 +34,6 @@
     <ClCompile Include="Pathfinder.cpp">
       <Filter>Game\World</Filter>
     </ClCompile>
-    <ClCompile Include="Config.cpp" />
     <ClCompile Include="PathmapTile.cpp">
       <Filter>Game\World</Filter>
     </ClCompile>
@@ -49,6 +48,9 @@
     </ClCompile>
     <ClCompile Include="FontCache.cpp">
       <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Config.cpp">
+      <Filter>Game</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -91,8 +93,8 @@
     <ClInclude Include="FontCache.h">
       <Filter>Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="Gate.h">
-      <Filter>Game\Game entities</Filter>
+    <ClInclude Include="Timer.h">
+      <Filter>Game</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

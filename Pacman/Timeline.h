@@ -10,12 +10,12 @@
 class TimeLine
 {
 public:
-	TimeLine(std::vector<const char*> source, bool loop, int fps)
+	TimeLine(const std::vector<const char*>& source, const bool loop, const int fps)
 	{
 		Init(source, loop, fps);
 	}
 
-	void Init(std::vector<const char*> source, bool loop, int fps)
+	void Init(const std::vector<const char*>& source, const bool loop, const int fps)
 	{
 		m_frames = source;
 		m_totalFrames = m_frames.size();
@@ -44,10 +44,10 @@ public:
 	}
 
 private:
-	bool m_loop;
-	int m_fps;
-	int m_currentFrame;
-	int m_totalFrames;
+	bool m_loop{};
+	int m_fps{};
+	int m_currentFrame{};
+	int m_totalFrames{};
 	std::vector<const char*> m_frames;
 };
 

@@ -15,18 +15,13 @@ public:
 	PathmapTile(Vector2i position, bool isBlocking, bool isSpawn, bool hasDot, bool hasBigDot);
 
 	void Draw(Drawer* drawer) override;
-	void EatDot();
-	void EatBigDot();
-	void EatCherry();
 	bool IsBlockingTile() const;
 	bool IsSpawnTile() const;
-	int GetX() const;
-	int GetY() const;
-	bool HasDot() const;
-	bool HasBigDot() const;
-	bool HasCherry() const;
+	int GetX() const override;
+	int GetY() const override;
 
 private:
+	//accessible in Pathfinder and World
 	bool m_isBlockingTile;
 	bool m_isSpawnTile;
 	bool m_hasDot;
@@ -34,9 +29,7 @@ private:
 	bool m_hasCherry;
 	int m_x;
 	int m_y;
-
-	//accessible in Pathfinder and World
-	bool visited;
+	bool m_visited;
 };
 
 #endif // PATHMAPTILE_H

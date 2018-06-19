@@ -16,7 +16,7 @@ inline std::vector<const char*> GetAvatarImages(const Direction direction)
 }
 
 Avatar::Avatar(const Vector2i& start)
-: MovableGameEntity(start, "open_32.png")
+: MovableGameEntity(start, nullptr)
 , m_powerUp(false)
 , m_timeLine(AVATAR_RIGHT, true, AVATAR_FPS)
 , m_currentMovement(STOP)
@@ -32,26 +32,12 @@ void Avatar::Draw(Drawer* drawer)
 
 void Avatar::Update(const float dt, World* world)
 {
-	const Vector2f destination(float(m_nextTileX * Config::tileSize), float(m_nextTileY * Config::tileSize));
-	Vector2f direction = destination - m_position;
-
-	const float distanceToMove = dt * (m_powerUp ? Config::powerupVelocity : Config::avatarVelocity);
-
-	if (distanceToMove > direction.Length())
-	{
-		m_position = destination;
-	}
-	else
-	{
-		direction.Normalize();
-		m_position += direction * distanceToMove;
+	const float speed = m_powerUp ? Config::powerupVelocity : Config::avatarVelocity;
+	if (Move(dt * speed))
 		m_timeLine.Update(dt);
-	}
 
 	if (m_nextMovement != m_currentMovement && IsInTileCenter())
-	{
 		SetMovement(m_nextMovement, world);
-	}
 }
 
 // assuming that avatar can change direction if it's approximately in the center of the tile
@@ -76,7 +62,7 @@ void Avatar::ChangeDirection(Vector2i& newDirection)
 void Avatar::SetMovement(const Direction newMovement, World* world)
 {
 	bool canUpdate = false;
-	const auto start = Vector2i(GetCurrentTileX(), GetCurrentTileY());
+	const auto start = Vector2i(GetX(), GetY());
 	Vector2i nextTile = start;
 	switch(newMovement)
 	{

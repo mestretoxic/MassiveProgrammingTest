@@ -139,3 +139,13 @@ bool Pacman::Draw() const
 
 	return true;
 }
+
+void Pacman::UpdateScore(const int value)
+{
+	m_score += value;
+}
+
+void Pacman::UpdateLives()
+{
+	m_lives--;
+}

@@ -3,7 +3,6 @@
 #include "SDL_ttf.h"
 #include <cassert>
 #include "FontCache.h"
-#include "Pacman.h"
 
 Drawer* Drawer::Create(SDL_Window* window, SDL_Renderer* renderer)
 {

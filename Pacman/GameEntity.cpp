@@ -4,8 +4,7 @@
 #include "Config.h"
 
 GameEntity::GameEntity(const Vector2i& position, const char* image)
-: m_isVisible(true)
-, m_position(Vector2f(0.f, 0.f))
+: m_position(Vector2f(0.f, 0.f))
 , m_image(image)
 {
 	SetPosition(position);
@@ -38,21 +37,21 @@ void GameEntity::Update(float, World*)
 
 Vector2i GameEntity::GetCurrentTilePosition() const
 {
-	return Vector2i(GetCurrentTileX(), GetCurrentTileY());
+	return Vector2i(GetX(), GetY());
 }
 
-int GameEntity::GetCurrentTileX() const
+int GameEntity::GetX() const
 {
 	return int(m_position.x / 22);
 }
 
-int GameEntity::GetCurrentTileY() const
+int GameEntity::GetY() const
 {
 	return int(m_position.y / 22);
 }
 
 bool GameEntity::IsInTileCenter() const
 {
-	return m_position.x - (GetCurrentTileX() * Config::tileSize) < 0.5 
-			&& m_position.y - (GetCurrentTileY() * Config::tileSize) < 0.5;
+	return m_position.x - (GetX() * Config::tileSize) < 0.5 
+			&& m_position.y - (GetY() * Config::tileSize) < 0.5;
 }

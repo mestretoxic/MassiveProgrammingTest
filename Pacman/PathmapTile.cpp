@@ -1,14 +1,15 @@
 #include "PathmapTile.h"
 
-PathmapTile::PathmapTile(Vector2i position, bool isBlocking, bool isSpawn, bool hasDot, bool hasBigDot):
-	GameEntity(position, nullptr)
-	, m_isBlockingTile(isBlocking)
-	, m_isSpawnTile(isSpawn)
-	, m_hasDot(hasDot)
-	, m_hasBigDot(hasBigDot)
-	, m_hasCherry(false)
-	, m_x(position.x)
-	, m_y(position.y)
+PathmapTile::PathmapTile(Vector2i position, bool isBlocking, bool isSpawn, bool hasDot, bool hasBigDot)
+:GameEntity(position, nullptr)
+, m_isBlockingTile(isBlocking)
+, m_isSpawnTile(isSpawn)
+, m_hasDot(hasDot)
+, m_hasBigDot(hasBigDot)
+, m_hasCherry(false)
+, m_x(position.x)
+, m_y(position.y)
+, m_visited(false)
 {
 }
 
@@ -28,18 +29,6 @@ void PathmapTile::Draw(Drawer* drawer)
 	GameEntity::Draw(drawer);
 }
 
-void PathmapTile::EatDot()
-{
-	m_hasDot = false;
-}
-void PathmapTile::EatBigDot()
-{
-	m_hasBigDot = false;
-}
-void PathmapTile::EatCherry()
-{
-	m_hasCherry = false;
-}
 bool PathmapTile::IsBlockingTile() const
 {
 	return m_isBlockingTile;
@@ -55,16 +44,4 @@ int PathmapTile::GetX() const
 int PathmapTile::GetY() const
 {
 	return m_y;
-}
-bool PathmapTile::HasDot() const
-{
-	return m_hasDot;
-}
-bool PathmapTile::HasBigDot() const
-{
-	return m_hasBigDot;
-}
-bool PathmapTile::HasCherry() const
-{
-	return m_hasCherry;
 }
