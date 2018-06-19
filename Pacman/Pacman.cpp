@@ -41,7 +41,7 @@ bool Pacman::Init()
 
 bool Pacman::Update(const float dt, SDL_Event& event)
 {
-	ASSERT_B(m_world, "World is null!");
+	ASSERT_BOOL(m_world, "World is null!");
 
 	if (!UpdateInput(event))
 		return false;
@@ -86,14 +86,14 @@ bool Pacman::UpdateInput(SDL_Event& event) const
 
 bool Pacman::CheckEndGameCondition() const
 {
-	ASSERT_B(m_world, "World is null!");
+	ASSERT_BOOL(m_world, "World is null!");
 	return !m_world->HasDots() || m_lives <= 0;
 }
 
 bool Pacman::Draw() const
 {
-	ASSERT_B(m_world, "World is null!");
-	ASSERT_B(m_drawer, "Drawer is null!");
+	ASSERT_BOOL(m_world, "World is null!");
+	ASSERT_BOOL(m_drawer, "Drawer is null!");
 
 	m_world->Draw(m_drawer);
 

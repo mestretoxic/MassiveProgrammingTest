@@ -47,6 +47,8 @@ void Ghost::Die()
 
 void Ghost::UpdatePathfinding(World* world)
 {
+	ASSERT(world, "World is null!");
+
 	Vector2i to(0,0);
 	bool ignoreSpawn = true;
 
@@ -89,6 +91,8 @@ void Ghost::UpdatePathfinding(World* world)
 
 void Ghost::Update(const float dt, World* world)
 {
+	ASSERT(world, "World is null!");
+
 	m_spawnTimer.Update(dt);
 
 	if (m_spawnTimer.isRunning)
@@ -135,6 +139,8 @@ void Ghost::Update(const float dt, World* world)
 
 void Ghost::Draw(Drawer* drawer)
 {
+	ASSERT(drawer, "Drawer is null!");
+
 	switch(m_state)
 	{
 	case DEAD:

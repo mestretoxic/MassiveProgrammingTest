@@ -7,10 +7,10 @@
 #ifdef DEBUG
 #include <cassert>
 #define ASSERT(exp, msg) assert(exp && msg)
-#define ASSERT_R(exp, msg) assert(exp && msg)
-#define ASSERT_B(exp, msg) assert(exp && msg)
+#define ASSERT_NULL(exp, msg) assert(exp && msg)
+#define ASSERT_BOOL(exp, msg) assert(exp && msg)
 #else
 #define ASSERT(exp, msg) if (!exp) return
-#define ASSERT_R(exp, msg) if (!exp) return nullptr
-#define ASSERT_B(exp, msg) if (!exp) return false
+#define ASSERT_NULL(exp, msg) if (!exp) return nullptr
+#define ASSERT_BOOL(exp, msg) if (!exp) return false
 #endif

@@ -50,8 +50,6 @@ T BinarySearch(std::vector<T> container, Pred pred)
 		}
     }
  
-    // if we reach here, then element was
-    // not present
     return nullptr;
 }
 
@@ -88,7 +86,6 @@ World::~World()
 	CleanupContainer(m_pathmapTiles);
 }
 
-// Removed copy-pasted code
 void World::Init()
 {
 	m_avatarStartPosition.Set(Config::avatarStartX, Config::avatarStartY);
@@ -118,7 +115,7 @@ void World::Init()
 		}
 		mapFile.close();
 
-		m_mapSize.Set(line.length(), lineIndex);
+		m_mapSize.Set(static_cast<int>(line.length()), lineIndex);
 	}
 
 	Reset();
@@ -310,6 +307,7 @@ Ghost* World::GetGhostAt(const int x, const int y) const
 
 void World::SetPowerUpActive(const bool value)
 {
+	ASSERT(m_avatar, "Avatar is null!");
 	m_avatar->SetPowerUp(value);
 	for (const auto& ghost : m_ghosts)
 		ghost->SetVulnerable(value);

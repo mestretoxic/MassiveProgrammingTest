@@ -18,7 +18,7 @@ public:
 	void Init(const std::vector<const char*>& source, const bool loop, const int fps)
 	{
 		m_frames = source;
-		m_totalFrames = m_frames.size();
+		m_totalFrames = static_cast<int>(m_frames.size());
 		m_currentFrame = 0;
 		m_loop = loop;
 		m_fps = fps;

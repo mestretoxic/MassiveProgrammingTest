@@ -15,6 +15,9 @@ bool ListDoesNotContain(PathmapTile* tileToFind, std::list<PathmapTile*>& list)
 
 PathmapTile* Pathfinder::GetValidTileAt(World* world, const Ghost* ghost, const int x, const int y, const bool ignoreSpawn)
 {
+	ASSERT_NULL(world, "World is null!");
+	ASSERT_NULL(ghost, "Ghost is null!");
+
 	Ghost* entity = world->GetGhostAt(x, y);
 	if (entity)
 		return nullptr;
@@ -38,6 +41,9 @@ PathmapTile* Pathfinder::GetValidTileAt(World* world, const Ghost* ghost, const 
 
 bool Pathfinder::Pathfind(World* world, const Ghost* ghost, PathmapTile* startTile, PathmapTile* endTile, const bool ignoreSpawn, std::list<PathmapTile*>& out)
 {
+	ASSERT_BOOL(world, "World is null!");
+	ASSERT_BOOL(ghost, "Ghost is null!");
+
 	if (!startTile || !endTile)
 		return false;
 

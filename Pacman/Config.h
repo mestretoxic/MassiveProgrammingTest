@@ -72,10 +72,10 @@ public:
 					continue;
 
 				const auto splitAt = line.find(" = ");
-				ASSERT_B((splitAt != std::string::npos), MSG_MALFORMED_CONFIG);
+				ASSERT_BOOL((splitAt != std::string::npos), MSG_MALFORMED_CONFIG);
 				const auto varName = line.substr(0, splitAt);
 				const auto strValue = line.substr(splitAt + 3);
-				ASSERT_B((!varName.empty() && !strValue.empty()), MSG_MALFORMED_CONFIG);
+				ASSERT_BOOL((!varName.empty() && !strValue.empty()), MSG_MALFORMED_CONFIG);
 				vars[varName] = strValue;
 			}
 			file.close();

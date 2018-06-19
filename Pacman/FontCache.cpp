@@ -15,7 +15,7 @@ FontCache::~FontCache()
 
 TTF_Font* FontCache::GetFont(const char* fontPath, const int fontSize)
 {
-	ASSERT_R(fontPath, "Invalid font path!");
+	ASSERT_NULL(fontPath, "Invalid font path!");
 
 	TTF_Font* font = nullptr;
 	const auto fontMapIt = m_loadedFonts.find(fontPath);
