@@ -26,7 +26,7 @@
 
 #define GET_STRING_VAR(name) 							\
 	WARNING(name)										\
-	name = vars.at(#name).c_str();						\
+	name = vars.at(#name).c_str();								\
 }														\
 
 typedef std::map<std::string, std::string> NameToValueMap;

@@ -292,7 +292,7 @@ void World::GetNextValidTile(const Vector2i& direction, Vector2i& out) const
 bool World::HasDots() const
 {
 	return std::any_of(m_pathmapTiles.cbegin(), m_pathmapTiles.cend(),
-		[](const PathmapTile* tile) { return tile->m_hasDot || tile->m_hasBigDot; });
+		[](const auto& tile) { return tile->m_hasDot || tile->m_hasBigDot; });
 }
 
 PathmapTile* World::GetTile(const int x, const int y) const
@@ -302,8 +302,7 @@ PathmapTile* World::GetTile(const int x, const int y) const
 
 Ghost* World::GetGhostAt(const int x, const int y) const
 {
-	auto found = std::find_if(m_ghosts.begin(), m_ghosts.end(), [&](const Ghost* g) { return g->GetX() == x && g->GetY() == y; });
-	return found != m_ghosts.end() ? *found : nullptr;
+	return GetEntityAt(m_ghosts, x, y, m_mapSize.x, m_mapSize.y);
 }
 
 void World::SetPowerUpActive(const bool value)

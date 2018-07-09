@@ -15,7 +15,7 @@ PathmapTile::PathmapTile(const Vector2i position, const bool isBlocking, const b
 
 bool operator==(const PathmapTile& lhs, const PathmapTile& rhs)
 {
-	return lhs.GetTilePosition() == rhs.GetTilePosition();
+	return lhs.GetPosition() == rhs.GetPosition();
 }
 
 void PathmapTile::Draw(Drawer* drawer)

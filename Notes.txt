@@ -1,0 +1,32 @@
+Summary of what I did to complete the test:
+1. Used Resharper to improve code readabilty and fix syntax issues.
+2. Simplified class structure. Moved similar logic from derived classes to base classes.
+3. Added simple cache systems for textures and fonts to avoid loading them every frame.
+4. Made Vector2 a template class for it to support different numeric types.
+5. Changed input capture method to use SDL keyboard events instead of key states.
+6. Fixed avatar movement logic and made it feel more close to the original game.
+7. Used templates to remove copy-pasted code for initialization, drawing, collision and gameplay checks in World.cpp.
+8. Moved pathfinding algorithm to separate class.
+9. Added Timeline class to manage avatar animation.
+10. Added Timer class to manage timed events like power-up duration and AI updates.
+11. Made AI pathfinding checks less frequent using Timer.
+12. Fixed game-breaking bugs in pathfinding algorithm.
+13. Added several AI behavior patterns for normal, vulnerable and dead states.
+14. Added Defines.h to hold constant variables and macros and moved most of constants there to eliminate "magic numbers" from code.
+15. Added Config class to read game settings from external file and store them. Used macros to speed up adding new settings.
+16. Implemented simple asserts to prevent and debug crashes on null pointers.
+17. Implemented destructors in classes to clean-up fields and containers with pointer types.
+18. Added Gate objects which teleport avatar to one another.
+19. Removed classes derived from StaticGameEntity and put data about game entities inside PathmapTile to minimize iterations during gameplay checks.
+20. Added more ghosts of different types.
+21. Improved text output methods and text rendering.
+22. Fixed Release build configuration.
+23. Implemented correct game reset mechanic with delay and movable objects re-creation.
+24. Implemented BinarySearch template method for faster search of tiles by coordinates.
+25. Played the game for a few sessions, fixed some bugs, had fun.
+
+Things I planned but couldn't do before deadline:
+- Fix possible memory leaks.
+- Implement collision detection for ghosts.
+- Improve pathfinding algorithm (use weighted AStar).
+- Add cherry - there's no graphics for cherry :(
